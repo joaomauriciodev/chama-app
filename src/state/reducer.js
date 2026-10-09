@@ -15,7 +15,7 @@ export const initialState = {
   match: null, // { id, phase: 'busca' | 'ofertas' }
   search: { cat: null, sort: 'perto', q: '' },
   orders: [
-    { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 3, when: '15 set', period: 'Manhã', where: 'casa', pay: 'Pix', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
+    { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 3, when: '15 set', period: 'Manhã', where: 'casa', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
   ],
   prov: {
     online: true,
@@ -28,7 +28,7 @@ export const initialState = {
 }
 
 export const newDraft = (catId = null, proId = null) => ({
-  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', pay: 'Pix', foto: false, audio: false, pro: proId,
+  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', foto: false, audio: false, pro: proId,
 })
 
 const toggle = (list, v) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
@@ -54,7 +54,7 @@ export function reducer(state, { type, v }) {
     case 'qty': d.qty = Math.min(20, Math.max(1, d.qty + v)); break
     case 'toggleExtra': d[v] = !d[v]; break
     case 'when': d.when = v; if (v === 'Flexível') d.period = null; break
-    case 'period': case 'where': case 'pay': d[type] = v; break
+    case 'period': case 'where': d[type] = v; break
     case 'next':
       if (s.flow.back === 4) { s.flow.step = 4; s.flow.back = null } else s.flow.step++
       break

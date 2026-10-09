@@ -1,11 +1,10 @@
-import { ArrowLeft, Banknote, Calendar, CalendarRange, Camera, Check, CreditCard, Mic, Pencil, QrCode, Send, X } from 'lucide-react'
+import { ArrowLeft, Calendar, CalendarRange, Camera, Check, Mic, Pencil, Send, X } from 'lucide-react'
 import { ADDR, CATS, PERIODS, cat, pro } from '../data/catalog'
 import { dayChips, estimate, firstName, money, unit, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, CategoryTile, Chip, Stepper } from '../components/ui'
 
 const STEPS = 5
-const PAYMENTS = [['Pix', QrCode], ['Cartão', CreditCard], ['Dinheiro', Banknote]]
 
 function StepService({ d, flow, go }) {
   const list = flow.only ? CATS.filter((c) => flow.only.includes(c.id)) : CATS
@@ -114,11 +113,7 @@ function StepReview({ d, go }) {
       <div className="est">
         <small>Estimativa pela média da região</small>
         <b>{money(lo)} a {money(hi)}</b>
-        <small>Você só paga o valor da proposta que aceitar.</small>
-      </div>
-      <h3 className="q2">Como prefere pagar?</h3>
-      <div className="chips wrap">
-        {PAYMENTS.map(([label, Icon]) => <Chip key={label} on={d.pay === label} icon={Icon} onClick={() => go('pay', label)}>{label}</Chip>)}
+        <small>O pagamento é combinado direto com o profissional.</small>
       </div>
     </>
   )

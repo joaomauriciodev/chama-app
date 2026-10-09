@@ -5,7 +5,7 @@ import { useApp } from '../../state/AppContext'
 import { CategoryTile, ProCard, RoleSwitch } from '../../components/ui'
 
 export function repeatOrder(go, o) {
-  go('startFlow', { cat: o.cat, pro: o.pro, step: 2, prefill: { subs: [...o.subs], qty: o.qty, where: o.where, pay: o.pay } })
+  go('startFlow', { cat: o.cat, pro: o.pro, step: 2, prefill: { subs: [...o.subs], qty: o.qty, where: o.where } })
 }
 
 export default function Home() {

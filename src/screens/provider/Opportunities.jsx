@@ -1,5 +1,5 @@
 import { Calendar, Image, MapPin, Mic, Moon, Radar, Radius } from 'lucide-react'
-import { DEMANDS, PLATFORM_FEE, cat } from '../../data/catalog'
+import { DEMANDS, cat } from '../../data/catalog'
 import { km, money, unit, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
@@ -37,7 +37,7 @@ export default function Opportunities() {
   const list = prov.online
     ? DEMANDS.filter((d) => prov.cats.includes(d.cat) && d.km <= prov.radius && !prov.hidden.includes(d.id))
     : []
-  const earned = prov.agenda.filter((a) => a.status === 'feito').reduce((s, a) => s + a.valor * (1 - PLATFORM_FEE), 0)
+  const earned = prov.agenda.filter((a) => a.status === 'feito').reduce((s, a) => s + a.valor, 0)
   const sent = prov.agenda.filter((a) => a.status === 'enviada').length
 
   return (

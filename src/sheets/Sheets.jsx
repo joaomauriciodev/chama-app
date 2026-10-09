@@ -1,5 +1,5 @@
 import { Calendar, FastForward, Hand, RotateCcw, Send, Star, X } from 'lucide-react'
-import { ADDR, PLATFORM_FEE, QUICK_REPLIES, RATING_TAGS, REVIEWS, cat, demand, pro } from '../data/catalog'
+import { ADDR, QUICK_REPLIES, RATING_TAGS, REVIEWS, cat, demand, pro } from '../data/catalog'
 import { firstName, money, round5, unit, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, Chip, Stepper } from '../components/ui'
@@ -158,7 +158,7 @@ function ProposalSheet({ id, val }) {
       <h4>Ajuste fino</h4>
       <Stepper value={money(val)} step={10} wide onChange={(n) => go('pstep', n)} labels={['Menos 10 reais', 'Mais 10 reais']} />
       <p className="muted small" style={{ marginTop: 14 }}>
-        Você confirma o horário pedido pelo cliente. Taxa da plataforma de {PLATFORM_FEE * 100}% descontada só após o pagamento.
+        Você confirma o horário pedido pelo cliente. O pagamento é combinado direto com ele, o app não intermedeia.
       </p>
       <button className="btn" onClick={act.sendProposal}><Send size={18} />Enviar proposta de {money(val)}</button>
     </>

@@ -30,7 +30,7 @@ export default function MatchOverlay() {
       </div>
       <div className="obody">
         <h2 className="q">{o.offers.length} propostas chegaram</h2>
-        <p className="hint">Compare e toque em escolher. O pagamento só acontece depois do serviço.</p>
+        <p className="hint">Compare e toque em escolher. O pagamento é combinado direto com o profissional.</p>
         <div className="list">
           {o.offers.map((f) => {
             const p = pro(f.pid)

@@ -65,7 +65,6 @@ export const REVIEWS = [
 export const AVATAR_COLORS = ['#FFD66B', '#A8D8FF', '#B9F0C9', '#FFC2B3', '#D9C8FF', '#FFE0A3', '#BDEBEA']
 export const WEEK = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 export const SHIFTS = [['M', 'Manhã'], ['T', 'Tarde'], ['N', 'Noite']]
-export const PLATFORM_FEE = 0.1
 
 export const cat = (id) => CATS.find((c) => c.id === id)
 export const pro = (id) => PROS.find((p) => p.id === +id)

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef, useState } from 'react'
-import { PRO_REPLIES, PLATFORM_FEE, pro } from '../data/catalog'
-import { firstName, money } from '../lib/format'
+import { PRO_REPLIES, pro } from '../data/catalog'
+import { firstName } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
 const AppContext = createContext(null)
@@ -58,7 +58,7 @@ export function AppProvider({ children }) {
     agendaStep(item) {
       const next = item.status === 'aceita' ? 'caminho' : 'feito'
       go('agendaStatus', { key: item.key, status: next })
-      if (next === 'feito') toast(`Você recebe ${money(item.valor * (1 - PLATFORM_FEE))}`, 'wallet')
+      if (next === 'feito') toast('Serviço concluído')
     },
   }), [go, toast])
 

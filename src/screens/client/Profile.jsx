@@ -1,8 +1,8 @@
-import { Bell, ChevronRight, LifeBuoy, MapPinned, Wallet } from 'lucide-react'
+import { Bell, ChevronRight, LifeBuoy, MapPinned } from 'lucide-react'
 import { useApp } from '../../state/AppContext'
 import { Avatar } from '../../components/ui'
 
-const ROWS = [[MapPinned, 'Endereços salvos', '2'], [Wallet, 'Pagamento', 'Pix'], [Bell, 'Notificações', 'Ativas'], [LifeBuoy, 'Ajuda', '']]
+const ROWS = [[MapPinned, 'Endereços salvos', '2'], [Bell, 'Notificações', 'Ativas'], [LifeBuoy, 'Ajuda', '']]
 
 export default function Profile() {
   const { go } = useApp()

@@ -1,5 +1,5 @@
 import { Calendar, CheckCheck, Navigation, Wallet } from 'lucide-react'
-import { PLATFORM_FEE, cat } from '../../data/catalog'
+import { cat } from '../../data/catalog'
 import { money, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, Pill } from '../../components/ui'
@@ -32,7 +32,7 @@ export default function Agenda() {
                   <Pill tone={tone} style={{ marginLeft: 'auto' }}>{label}</Pill>
                 </div>
                 <div className="dmeta" style={{ marginBottom: active ? 12 : 0 }}>
-                  <span><Wallet size={14} />{money(a.valor)}, você recebe {money(a.valor * (1 - PLATFORM_FEE))}</span>
+                  <span><Wallet size={14} />{money(a.valor)} combinado</span>
                 </div>
                 {a.status === 'aceita' && (
                   <button className="btn sm" onClick={() => act.agendaStep(a)}><Navigation size={16} />Iniciar trajeto</button>
