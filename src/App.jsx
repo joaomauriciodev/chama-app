@@ -16,22 +16,6 @@ const SCREENS = {
   opps: Opportunities, agenda: Agenda, pperfil: ProviderProfile,
 }
 
-function Aside() {
-  return (
-    <aside className="side">
-      <p className="logo">chama<span className="dot" /></p>
-      <p>Protótipo navegável de um app que liga quem precisa de um serviço a profissionais da mesma região, só pelo CEP. Quase tudo é toque: um pedido completo sai em cerca de seis toques, sem digitar nada.</p>
-      <h2>Experimente</h2>
-      <ol>
-        <li><b>Peça uma montagem</b> pela tela inicial e escolha uma das propostas.</li>
-        <li><b>Converse com toques</b> no pedido confirmado, depois avance o status e avalie.</li>
-        <li><b>Troque para Trabalhar</b> no topo e envie uma proposta como prestador.</li>
-        <li><b>Busque e chame</b> um profissional direto pela aba Buscar.</li>
-      </ol>
-    </aside>
-  )
-}
-
 function Phone() {
   const { state } = useApp()
   useEscape()
@@ -53,10 +37,7 @@ function Phone() {
 export default function App() {
   return (
     <AppProvider>
-      <div className="stage">
-        <Aside />
-        <Phone />
-      </div>
+      <Phone />
     </AppProvider>
   )
 }
