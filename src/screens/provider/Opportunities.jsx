@@ -1,11 +1,11 @@
-import { Calendar, Image, MapPin, MapPinned, Mic, Moon, Radar } from 'lucide-react'
+import { Calendar, Image, MapPin, MapPinned, MessageCircle, Mic, Moon, Radar } from 'lucide-react'
 import { AREAS, DEMANDS, cat, inArea } from '../../data/catalog'
 import { firstName, money, size, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
 
 function DemandCard({ d }) {
-  const { go, act } = useApp()
+  const { act } = useApp()
   const c = cat(d.cat)
   return (
     <article className="dcard">
@@ -25,7 +25,7 @@ function DemandCard({ d }) {
       </div>
       <div className="dact">
         <button className="btn ghost sm" onClick={() => act.pass(d.id)}>Passar</button>
-        <button className="btn sm" onClick={() => go('propose', d.id)}>Enviar proposta</button>
+        <button className="btn sm" onClick={() => act.startChat(d.id)}><MessageCircle size={16} />Conversar</button>
       </div>
     </article>
   )
@@ -37,8 +37,8 @@ export default function Opportunities() {
   const list = prov.online
     ? DEMANDS.filter((d) => prov.cats.includes(d.cat) && inArea(prov.base, prov.area, d) && !prov.hidden.includes(d.id))
     : []
-  const earned = prov.agenda.filter((a) => a.status === 'feito').reduce((s, a) => s + a.valor, 0)
-  const sent = prov.agenda.filter((a) => a.status === 'enviada').length
+  const earned = prov.matches.filter((m) => m.status !== 'conversa').reduce((sum, m) => sum + m.chat.valor, 0)
+  const talking = prov.matches.filter((m) => m.status === 'conversa').length
 
   return (
     <div className="screen">
@@ -60,8 +60,8 @@ export default function Opportunities() {
       </button>
 
       <div className="stats3" style={{ marginTop: 10 }}>
-        <div><small>Na semana</small><b>{money(earned)}</b></div>
-        <div><small>Propostas</small><b>{sent}</b></div>
+        <div><small>Firmados</small><b>{money(earned)}</b></div>
+        <div><small>Conversas</small><b>{talking}</b></div>
         <div><small>Sua nota</small><b>4,9</b></div>
       </div>
 

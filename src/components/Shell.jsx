@@ -1,19 +1,18 @@
 import {
-  Calendar, CalendarCheck, Check, ClipboardList, EyeOff, House, PartyPopper, Radar, Search, Send, User, UserCog, Wallet, Bell,
+  Calendar, Check, ClipboardList, EyeOff, House, MessagesSquare, PartyPopper, Radar, Search, Send, User, UserCog, Wallet, Bell,
 } from 'lucide-react'
 import { useEffect } from 'react'
+import { needsAction } from '../lib/deal'
 import { useApp } from '../state/AppContext'
 
 const CLIENT_TABS = [['inicio', House, 'Início'], ['buscar', Search, 'Buscar'], ['pedidos', ClipboardList, 'Pedidos'], ['perfil', User, 'Perfil']]
-const PROVIDER_TABS = [['opps', Radar, 'Pedidos'], ['agenda', CalendarCheck, 'Agenda'], ['pperfil', UserCog, 'Perfil']]
+const PROVIDER_TABS = [['opps', Radar, 'Pedidos'], ['agenda', MessagesSquare, 'Conversas'], ['pperfil', UserCog, 'Perfil']]
 
 export function TabBar() {
   const { state, go } = useApp()
   const isClient = state.role === 'cliente'
   const tabs = isClient ? CLIENT_TABS : PROVIDER_TABS
-  const badge = isClient
-    ? state.orders.filter((o) => ['buscando', 'avaliar'].includes(o.status)).length
-    : state.prov.agenda.filter((a) => a.status === 'aceita').length
+  const badge = (isClient ? state.orders : state.prov.matches).filter(needsAction).length
   const badgeTab = isClient ? 'pedidos' : 'agenda'
 
   return (

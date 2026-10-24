@@ -32,30 +32,30 @@ export const BIG_FURNITURE_PRICE = [15, 25]
 
 // Prestadores fictícios (no app real viriam da API, filtrados pela área do CEP).
 export const PROS = [
-  { id: 1, nome: 'Marcos Lima', cats: ['montagem', 'reparos'], nota: 4.9, qtd: 312, bairro: 'Bela Vista', desde: 60, ver: true, resp: '5 min' },
-  { id: 2, nome: 'Cláudia Souza', cats: ['limpeza'], nota: 4.8, qtd: 540, bairro: 'Consolação', desde: 35, ver: true, resp: '10 min' },
-  { id: 3, nome: 'Rafael Teixeira', cats: ['eletrica', 'reparos'], nota: 4.7, qtd: 128, bairro: 'Liberdade', desde: 55, ver: true, resp: '15 min' },
-  { id: 4, nome: 'Jéssica Martins', cats: ['limpeza', 'jardim'], nota: 4.9, qtd: 201, bairro: 'Jardim Paulista', desde: 30, ver: true, resp: '8 min' },
-  { id: 5, nome: 'Paulo Henrique', cats: ['hidraulica', 'reparos'], nota: 4.6, qtd: 95, bairro: 'Santa Cecília', desde: 70, ver: false, resp: '20 min' },
-  { id: 6, nome: 'Sérgio Alves', cats: ['pintura'], nota: 4.8, qtd: 77, bairro: 'Pinheiros', desde: 180, ver: true, resp: '30 min' },
-  { id: 7, nome: 'Tiago Rocha', cats: ['frete', 'montagem'], nota: 4.7, qtd: 410, bairro: 'Cambuci', desde: 120, ver: true, resp: '6 min' },
-  { id: 8, nome: 'Lourdes Pereira', cats: ['limpeza'], nota: 5.0, qtd: 63, bairro: 'Bela Vista', desde: 40, ver: true, resp: '12 min' },
-  { id: 9, nome: 'André Nunes', cats: ['jardim', 'pintura'], nota: 4.5, qtd: 48, bairro: 'Vila Mariana', desde: 45, ver: false, resp: '25 min' },
-  { id: 10, nome: 'Bruno Carvalho', cats: ['eletrica', 'hidraulica'], nota: 4.9, qtd: 156, bairro: 'Aclimação', desde: 60, ver: true, resp: '9 min' },
+  { id: 1, nome: 'Marcos Lima', tel: '11987650001', cats: ['montagem', 'reparos'], nota: 4.9, qtd: 312, bairro: 'Bela Vista', desde: 60, ver: true, resp: '5 min' },
+  { id: 2, nome: 'Cláudia Souza', tel: '11987650002', cats: ['limpeza'], nota: 4.8, qtd: 540, bairro: 'Consolação', desde: 35, ver: true, resp: '10 min' },
+  { id: 3, nome: 'Rafael Teixeira', tel: '11987650003', cats: ['eletrica', 'reparos'], nota: 4.7, qtd: 128, bairro: 'Liberdade', desde: 55, ver: true, resp: '15 min' },
+  { id: 4, nome: 'Jéssica Martins', tel: '11987650004', cats: ['limpeza', 'jardim'], nota: 4.9, qtd: 201, bairro: 'Jardim Paulista', desde: 30, ver: true, resp: '8 min' },
+  { id: 5, nome: 'Paulo Henrique', tel: '11987650005', cats: ['hidraulica', 'reparos'], nota: 4.6, qtd: 95, bairro: 'Santa Cecília', desde: 70, ver: false, resp: '20 min' },
+  { id: 6, nome: 'Sérgio Alves', tel: '11987650006', cats: ['pintura'], nota: 4.8, qtd: 77, bairro: 'Pinheiros', desde: 180, ver: true, resp: '30 min' },
+  { id: 7, nome: 'Tiago Rocha', tel: '11987650007', cats: ['frete', 'montagem'], nota: 4.7, qtd: 410, bairro: 'Cambuci', desde: 120, ver: true, resp: '6 min' },
+  { id: 8, nome: 'Lourdes Pereira', tel: '11987650008', cats: ['limpeza'], nota: 5.0, qtd: 63, bairro: 'Bela Vista', desde: 40, ver: true, resp: '12 min' },
+  { id: 9, nome: 'André Nunes', tel: '11987650009', cats: ['jardim', 'pintura'], nota: 4.5, qtd: 48, bairro: 'Vila Mariana', desde: 45, ver: false, resp: '25 min' },
+  { id: 10, nome: 'Bruno Carvalho', tel: '11987650010', cats: ['eletrica', 'hidraulica'], nota: 4.9, qtd: 156, bairro: 'Aclimação', desde: 60, ver: true, resp: '9 min' },
 ]
 
 // Pedidos abertos que aparecem para o prestador.
 export const DEMANDS = [
-  { id: 'd1', cat: 'montagem', subs: ['Guarda-roupa'], qty: 1, when: 'Hoje', period: 'Tarde', bairro: 'Jardim América', cep: '01430-001', cidade: 'São Paulo', est: [110, 160], foto: true },
-  { id: 'd2', cat: 'reparos', subs: ['Suporte de TV', 'Quadros'], qty: 3, when: 'Amanhã', period: 'Manhã', bairro: 'República', cep: '01045-001', cidade: 'São Paulo', est: [90, 140] },
-  { id: 'd3', cat: 'eletrica', subs: ['Chuveiro'], qty: 1, when: 'Hoje', period: 'Noite', bairro: 'Vila Mariana', cep: '04101-000', cidade: 'São Paulo', est: [70, 110], audio: true },
-  { id: 'd4', cat: 'montagem', subs: ['Cozinha'], qty: 1, when: 'Sábado', period: 'Manhã', bairro: 'Bela Vista', cep: '01310-100', cidade: 'São Paulo', est: [250, 380], foto: true },
-  { id: 'd5', cat: 'limpeza', subs: ['Pós-obra'], qty: 4, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01301-000', cidade: 'São Paulo', est: [200, 280] },
-  { id: 'd6', cat: 'eletrica', subs: ['Tomada', 'Luminária'], qty: 4, when: 'Flexível', period: null, bairro: 'Santana', cep: '02012-000', cidade: 'São Paulo', est: [120, 180] },
-  { id: 'd7', cat: 'reparos', subs: ['Cortina ou varão'], qty: 2, when: 'Hoje', period: 'Tarde', bairro: 'Mooca', cep: '03101-000', cidade: 'São Paulo', est: [70, 100], foto: true },
-  { id: 'd9', cat: 'limpeza', subs: ['Residencial'], qty: 1, rooms: { quartos: 3, banheiros: 2, salas: 1, cozinhas: 1, servico: 1 }, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01302-000', cidade: 'São Paulo', est: [270, 405], foto: true },
-  { id: 'd10', cat: 'frete', subs: ['Mudança pequena'], qty: 1, moveis: 6, when: 'Sábado', period: 'Manhã', bairro: 'Santa Cecília', cep: '01227-000', cidade: 'São Paulo', est: [210, 400] },
-  { id: 'd8', cat: 'montagem', subs: ['Cama', 'Rack ou estante'], qty: 2, when: 'Amanhã', period: 'Tarde', bairro: 'Jardim Europa', cep: '01449-000', cidade: 'São Paulo', est: [140, 200] },
+  { id: 'd1', cliente: 'Juliana', cat: 'montagem', subs: ['Guarda-roupa'], qty: 1, when: 'Hoje', period: 'Tarde', bairro: 'Jardim América', cep: '01430-001', cidade: 'São Paulo', est: [110, 160], foto: true },
+  { id: 'd2', cliente: 'Ricardo', cat: 'reparos', subs: ['Suporte de TV', 'Quadros'], qty: 3, when: 'Amanhã', period: 'Manhã', bairro: 'República', cep: '01045-001', cidade: 'São Paulo', est: [90, 140] },
+  { id: 'd3', cliente: 'Patrícia', cat: 'eletrica', subs: ['Chuveiro'], qty: 1, when: 'Hoje', period: 'Noite', bairro: 'Vila Mariana', cep: '04101-000', cidade: 'São Paulo', est: [70, 110], audio: true },
+  { id: 'd4', cliente: 'Diego', cat: 'montagem', subs: ['Cozinha'], qty: 1, when: 'Sábado', period: 'Manhã', bairro: 'Bela Vista', cep: '01310-100', cidade: 'São Paulo', est: [250, 380], foto: true },
+  { id: 'd5', cliente: 'Fernanda', cat: 'limpeza', subs: ['Pós-obra'], qty: 4, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01301-000', cidade: 'São Paulo', est: [200, 280] },
+  { id: 'd6', cliente: 'Roberto', cat: 'eletrica', subs: ['Tomada', 'Luminária'], qty: 4, when: 'Flexível', period: null, bairro: 'Santana', cep: '02012-000', cidade: 'São Paulo', est: [120, 180] },
+  { id: 'd7', cliente: 'Camila', cat: 'reparos', subs: ['Cortina ou varão'], qty: 2, when: 'Hoje', period: 'Tarde', bairro: 'Mooca', cep: '03101-000', cidade: 'São Paulo', est: [70, 100], foto: true },
+  { id: 'd9', cliente: 'Beatriz', cat: 'limpeza', subs: ['Residencial'], qty: 1, rooms: { quartos: 3, banheiros: 2, salas: 1, cozinhas: 1, servico: 1 }, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01302-000', cidade: 'São Paulo', est: [270, 405], foto: true },
+  { id: 'd10', cliente: 'Gustavo', cat: 'frete', subs: ['Mudança pequena'], qty: 1, moveis: 6, when: 'Sábado', period: 'Manhã', bairro: 'Santa Cecília', cep: '01227-000', cidade: 'São Paulo', est: [210, 400] },
+  { id: 'd8', cliente: 'Eduardo', cat: 'montagem', subs: ['Cama', 'Rack ou estante'], qty: 2, when: 'Amanhã', period: 'Tarde', bairro: 'Jardim Europa', cep: '01449-000', cidade: 'São Paulo', est: [140, 200] },
 ]
 
 export const ADDR = [
@@ -91,6 +91,9 @@ export const PERIODS = [
 
 export const QUICK_REPLIES = ['Estou em casa', 'Pode vir mais cedo?', 'Tem vaga na garagem', 'Interfone 42', 'Vou atrasar 15 min']
 export const PRO_REPLIES = ['Combinado!', 'Perfeito, obrigado pelo aviso.', 'Pode deixar 👍']
+export const PRO_QUICK = ['Posso ir no horário pedido', 'Levo o material', 'Pode mandar uma foto?', 'Tem onde estacionar?']
+export const CLIENT_REPLIES = ['Combinado!', 'Perfeito, obrigada.', 'Pode ser 👍', 'Sim, tem sim.']
+export const CLIENT_TAGS = ['Pontual', 'Educado', 'Pagou o combinado', 'Local organizado', 'Comunicação clara']
 export const RATING_TAGS = ['Pontual', 'Caprichoso', 'Educado', 'Preço justo', 'Deixou tudo limpo']
 export const REVIEWS = [
   ['Juliana', 'Chegou no horário e deixou tudo limpo.'],

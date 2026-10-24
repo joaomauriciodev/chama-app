@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useReducer, useRef, useState } from 'react'
-import { PRO_REPLIES, pro } from '../data/catalog'
-import { firstName } from '../lib/format'
+import { CLIENT_REPLIES, PRO_REPLIES } from '../data/catalog'
+import { round5 } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
 const AppContext = createContext(null)
@@ -18,55 +18,65 @@ export function AppProvider({ children }) {
     toastTimer.current = setTimeout(() => setToastMsg(null), 2400)
   }, [])
 
-  // Ações com efeitos colaterais (timers que simulam o backend / o outro lado).
-  const act = useMemo(() => ({
-    publish() {
-      const id = Date.now()
-      go('publish', id)
-      setTimeout(() => go('showOffers', id), 2400)
-    },
-    choose(pid) {
-      const p = pro(pid)
-      go('choose', { pid, greeting: `Oi! Aqui é ${firstName(p)}. Confirmado, chego no horário combinado.` })
-      toast(`${firstName(p)} confirmado`)
-    },
-    closeMatch() {
-      go('closeMatch')
-      toast('Avisamos quando chegarem mais propostas', 'bell')
-    },
-    quickReply(orderId, text) {
-      go('msg', { id: orderId, msg: { me: true, t: text } })
-      setTimeout(() => go('msg', { id: orderId, msg: { t: PRO_REPLIES[Math.floor(Math.random() * PRO_REPLIES.length)] } }), 900)
-    },
-    rate() {
-      go('rate')
-      toast('Avaliação enviada')
-    },
-    pass(id) {
-      go('pass', id)
-      toast('Pedido ocultado', 'eye-off')
-    },
-    sendProposal() {
-      const key = Date.now()
-      go('sendProposal', key)
-      toast('Proposta enviada', 'send')
-      setTimeout(() => {
-        go('agendaStatus', { key, status: 'aceita' })
-        toast('O cliente aceitou sua proposta', 'party')
-      }, 3500)
-    },
-    subscribe(meses) {
-      go('su', { paying: true })
-      const until = new Date()
-      until.setMonth(until.getMonth() + meses)
-      setTimeout(() => go('suPaid', until.toISOString()), 1500)
-    },
-    agendaStep(item) {
-      const next = item.status === 'aceita' ? 'caminho' : 'feito'
-      go('agendaStatus', { key: item.key, status: next })
-      if (next === 'feito') toast('Serviço concluído')
-    },
-  }), [go, toast])
+  // Ações com efeitos colaterais. Os timers simulam o outro lado da conversa até existir backend.
+  const act = useMemo(() => {
+    const say = (side, id, msg, ms) => setTimeout(() => go('chatMsg', { side, id, msg: { by: 'them', ...msg } }), ms)
+    const pick = (list) => list[Math.floor(Math.random() * list.length)]
+    const firmar = (side, id) => {
+      go('firmar', { side, id })
+      toast(side === 'cliente' ? 'Pedido firmado! WhatsApp liberado' : 'Pedido firmado! Seu WhatsApp foi liberado', 'party')
+    }
+    return {
+      publish() {
+        const id = Date.now()
+        go('publish', id)
+        setTimeout(() => go('showOffers', id), 2400)
+      },
+      closeMatch() {
+        go('closeMatch')
+        toast('Avisamos quando chegarem mais propostas', 'bell')
+      },
+      startChat(did) {
+        const id = Date.now()
+        go('startChat', { did, id })
+        say('prestador', id, { t: 'Oi! Que bom que você topou. Qual valor você faz?' }, 900)
+      },
+      send(side, id, t) {
+        go('chatMsg', { side, id, msg: { by: 'me', t } })
+        say(side, id, { t: pick(side === 'cliente' ? PRO_REPLIES : CLIENT_REPLIES) }, 900)
+      },
+      // O outro lado aceita se o valor estiver perto da referência dele; senão contrapropõe no meio do caminho.
+      propose(side, id, valor, ref) {
+        go('chatMsg', { side, id, msg: { by: 'me', t: 'Minha proposta:', valor } })
+        const ok = side === 'cliente' ? valor >= ref * 0.9 : valor <= ref * 1.1
+        setTimeout(() => {
+          if (ok) {
+            go('chatMsg', { side, id, msg: { by: 'them', t: 'Fechado! Aceito.' } })
+            firmar(side, id)
+          } else {
+            const c = round5((valor + ref) / 2)
+            go('chatMsg', { side, id, msg: { by: 'them', t: 'Consigo fechar por:', valor: c } })
+          }
+        }, 1300)
+      },
+      accept: firmar,
+      rate(side, id) {
+        go('rate', { side, id })
+        toast('Avaliação enviada')
+        setTimeout(() => go('theyRated', { side, id }), 2500)
+      },
+      pass(id) {
+        go('pass', id)
+        toast('Pedido ocultado', 'eye-off')
+      },
+      subscribe(meses) {
+        go('su', { paying: true })
+        const until = new Date()
+        until.setMonth(until.getMonth() + meses)
+        setTimeout(() => go('suPaid', until.toISOString()), 1500)
+      },
+    }
+  }, [go, toast])
 
   const value = useMemo(() => ({ state, go, act, toastMsg }), [state, go, act, toastMsg])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

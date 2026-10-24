@@ -1,8 +1,9 @@
-import { Calendar, FastForward, Hand, RotateCcw, Send, Star, X } from 'lucide-react'
-import { QUICK_REPLIES, RATING_TAGS, REVIEWS, ROOMS, cat, demand, place, pro } from '../data/catalog'
-import { firstName, money, round5, size, whenLabel } from '../lib/format'
+import { Calendar, Hand, Lock, MessageCircle, RotateCcw, Star, X } from 'lucide-react'
+import { CLIENT_TAGS, PRO_QUICK, QUICK_REPLIES, RATING_TAGS, REVIEWS, ROOMS, cat, place, pro } from '../data/catalog'
+import { firstName, money, size, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
-import { Avatar, Chip, Stepper } from '../components/ui'
+import { Avatar } from '../components/ui'
+import { Conversation, RateBlock, SimulateDay, WhatsAppCard } from '../components/Chat'
 import { Sheet } from '../components/Shell'
 import { repeatOrder } from '../screens/client/Home'
 
@@ -61,15 +62,45 @@ function ProSheet({ id }) {
   )
 }
 
-/* Detalhe do pedido: status, chat por toques, avaliação */
+const STEPS = ['Pedido publicado', 'Conversa', 'Pedido firmado', 'Avaliações']
+const STEP_IDX = { buscando: 0, conversa: 1, firmado: 2, concluido: 3 }
+
+function Timeline({ status, from = 0 }) {
+  const idx = STEP_IDX[status]
+  return <ol className="tl">{STEPS.slice(from).map((st, i) => <li key={st} className={i + from <= idx ? 'done' : ''}>{st}</li>)}</ol>
+}
+
+function RoomChips({ rooms }) {
+  return (
+    <>
+      <h4>Imóvel</h4>
+      <div className="chips wrap">
+        {ROOMS.filter((r) => rooms[r.id]).map((r) => <span key={r.id} className="chip">{rooms[r.id]} {rooms[r.id] > 1 ? r.varios : r.um}</span>)}
+      </div>
+    </>
+  )
+}
+
+function Closed({ e, who }) {
+  const c = e.chat
+  return (
+    <p className="muted small">
+      {c.myRating
+        ? `Você deu ${c.myRating.stars} ${c.myRating.stars > 1 ? 'estrelas' : 'estrela'}${c.myRating.tags.length ? ` e destacou: ${c.myRating.tags.join(', ').toLowerCase()}` : ''}.`
+        : 'Fechado automaticamente após 1 dia sem sua avaliação.'}
+      {c.theirRated ? ` ${who} também avaliou.` : ''}
+    </p>
+  )
+}
+
+/* Pedido do cliente: propostas, conversa com o profissional, WhatsApp e avaliação */
 function OrderSheet({ id }) {
-  const { state, go, act } = useApp()
+  const { state, go } = useApp()
   const o = state.orders.find((x) => x.id === id)
   const c = cat(o.cat)
   const p = o.pro ? pro(o.pro) : null
   const a = place(o)
-  const steps = ['Pedido publicado', 'Profissional confirmado', 'A caminho', 'Concluído']
-  const idx = { buscando: 0, confirmado: 1, caminho: 2, avaliar: 3, concluido: 3 }[o.status]
+  const valor = o.chat?.valor ?? o.chat?.proposta?.valor
 
   return (
     <>
@@ -82,7 +113,7 @@ function OrderSheet({ id }) {
             <span className="pname">{p.nome}</span>
             <span className="pmeta"><span><Star size={14} className="st" /> {p.nota.toFixed(1)}</span><span>{whenLabel(o)}</span></span>
           </span>
-          <span className="pprice">{money(o.preco)}</span>
+          {valor && <span className="pprice"><small>{o.chat.valor ? 'combinado' : 'proposta'}</small>{money(valor)}</span>}
         </button>
       ) : (
         <div className="row" style={{ paddingTop: 0 }}>
@@ -90,85 +121,117 @@ function OrderSheet({ id }) {
         </div>
       )}
 
-      <ol className="tl">{steps.map((s, i) => <li key={s} className={i <= idx ? 'done' : ''}>{s}</li>)}</ol>
+      <Timeline status={o.status} />
 
       {o.status === 'buscando' && (
         <button className="btn" onClick={() => go('seeOffers', o.id)}>Ver {o.offers.length} propostas</button>
       )}
 
-      {(o.status === 'confirmado' || o.status === 'caminho') && (
+      {o.status === 'conversa' && (
         <>
-          <h4>Mensagens</h4>
-          <div className="chat">{o.msgs.map((m, i) => <div key={i} className={`msg ${m.me ? 'me' : ''}`}>{m.t}</div>)}</div>
-          <div className="qr">{QUICK_REPLIES.map((t) => <button key={t} className="chip" onClick={() => act.quickReply(o.id, t)}>{t}</button>)}</div>
-          <div style={{ marginTop: 14 }}>
-            <button className="btn ghost" onClick={() => go('advance', o.id)}>
-              <FastForward size={18} />{o.status === 'confirmado' ? 'Simular: profissional saiu' : 'Simular: serviço concluído'}
-            </button>
-          </div>
+          <h4>Conversa com {firstName(p)}</h4>
+          <p className="muted small" style={{ margin: '0 0 8px' }}>Combinem o valor aqui. Quando os dois firmarem, o WhatsApp de {firstName(p)} é liberado.</p>
+          <Conversation side="cliente" e={o} quick={QUICK_REPLIES} who={firstName(p)} />
         </>
       )}
 
-      {o.status === 'avaliar' && (
+      {(o.status === 'firmado' || o.status === 'concluido') && p && (
         <>
-          <h4>Como foi com {firstName(p)}?</h4>
-          <div className="stars">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} className={n <= o.rt.stars ? 'on' : ''} onClick={() => go('star', n)} aria-label={`${n} estrelas`}><Star size={36} /></button>
-            ))}
-          </div>
-          <div className="chips wrap">
-            {RATING_TAGS.map((t) => <Chip key={t} on={o.rt.tags.includes(t)} onClick={() => go('rtag', t)}>{t}</Chip>)}
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <button className="btn" onClick={act.rate} disabled={!o.rt.stars}>Enviar avaliação</button>
-          </div>
+          <h4>Continue pelo WhatsApp</h4>
+          <WhatsAppCard name={firstName(p)} tel={p.tel} message={`Oi ${firstName(p)}! Sou a Ana, do Chama. Firmamos o pedido de ${c.nome.toLowerCase()} por ${money(o.chat.valor)}.`} />
+        </>
+      )}
+
+      {o.status === 'firmado' && (
+        <>
+          <RateBlock side="cliente" e={o} who={firstName(p)} tags={RATING_TAGS} />
+          <SimulateDay side="cliente" e={o} />
         </>
       )}
 
       {o.status === 'concluido' && p && (
         <>
-          <p className="muted small">
-            Você deu {o.rt.stars} estrelas{o.rt.tags.length ? ` e destacou: ${o.rt.tags.join(', ').toLowerCase()}` : ''}.
-          </p>
+          <Closed e={o} who={firstName(p)} />
           <button className="btn" onClick={() => repeatOrder(go, o)}><RotateCcw size={18} />Pedir de novo com {firstName(p)}</button>
+        </>
+      )}
+
+      {(o.status === 'firmado' || o.status === 'concluido') && o.chat.msgs.length > 0 && (
+        <>
+          <h4>Histórico da conversa</h4>
+          <Conversation side="cliente" e={o} quick={[]} who={firstName(p)} />
         </>
       )}
     </>
   )
 }
 
-/* Prestador escolhe o valor da proposta com toques */
-function ProposalSheet({ id, val }) {
-  const { go, act } = useApp()
-  const d = demand(id)
+/* Conversa do prestador com o cliente de um pedido */
+function MatchSheet({ id }) {
+  const { state } = useApp()
+  const m = state.prov.matches.find((x) => x.id === id)
+  const d = m.d
   const c = cat(d.cat)
-  const mid = round5((d.est[0] + d.est[1]) / 2)
-  const options = [[d.est[0], 'menor'], [mid, 'média'], [d.est[1], 'maior']]
 
   return (
     <>
       <SheetHead media={<span className="ic"><c.Icon size={20} /></span>} title={d.subs.join(', ')} subtitle={`${d.rooms ? '' : size(c, d) + ', '}${whenLabel(d)}, ${d.bairro}`} />
-      {d.rooms && (
+      <div className="row" style={{ paddingTop: 0 }}>
+        <Avatar person={{ id: d.cliente.length, nome: d.cliente }} />
+        <span className="rl"><b>{d.cliente}</b><small>Estimativa da região: {money(d.est[0])} a {money(d.est[1])}</small></span>
+      </div>
+      {d.rooms && <RoomChips rooms={d.rooms} />}
+
+      <Timeline status={m.status} from={1} />
+
+      {m.status === 'conversa' && (
         <>
-          <h4>Imóvel</h4>
-          <div className="chips wrap">
-            {ROOMS.filter((r) => d.rooms[r.id]).map((r) => <span key={r.id} className="chip">{d.rooms[r.id]} {d.rooms[r.id] > 1 ? r.varios : r.um}</span>)}
-          </div>
+          <h4>Conversa com {d.cliente}</h4>
+          <p className="muted small" style={{ margin: '0 0 8px' }}>Combine o valor aqui. Quando os dois firmarem, {d.cliente} recebe seu WhatsApp.</p>
+          <Conversation side="prestador" e={m} quick={PRO_QUICK} who={d.cliente} />
         </>
       )}
-      <h4>Seu valor</h4>
-      <div className="chips wrap">
-        {options.map(([v, label]) => (
-          <Chip key={label} on={val === v} onClick={() => go('pval', v)}>{money(v)}<span style={{ opacity: 0.7, fontWeight: 500 }}>{label}</span></Chip>
-        ))}
-      </div>
-      <h4>Ajuste fino</h4>
-      <Stepper value={money(val)} step={10} wide onChange={(n) => go('pstep', n)} labels={['Menos 10 reais', 'Mais 10 reais']} />
-      <p className="muted small" style={{ marginTop: 14 }}>
-        Você confirma o horário pedido pelo cliente. O pagamento é combinado direto com ele, o app não intermedeia.
+
+      {(m.status === 'firmado' || m.status === 'concluido') && (
+        <div className="banner wa-sent"><MessageCircle size={18} />{d.cliente} recebeu seu WhatsApp e vai te chamar por lá. Valor combinado: {money(m.chat.valor)}.</div>
+      )}
+
+      {m.status === 'firmado' && (
+        <>
+          <RateBlock side="prestador" e={m} who={d.cliente} tags={CLIENT_TAGS} />
+          <SimulateDay side="prestador" e={m} />
+        </>
+      )}
+
+      {m.status === 'concluido' && <Closed e={m} who={d.cliente} />}
+
+      {m.status !== 'conversa' && (
+        <>
+          <h4>Histórico da conversa</h4>
+          <Conversation side="prestador" e={m} quick={[]} who={d.cliente} />
+        </>
+      )}
+    </>
+  )
+}
+
+/* Aviso de que o pedido anterior precisa fechar antes de começar outro */
+function LockSheet({ side, id }) {
+  const { state, go } = useApp()
+  const isClient = side === 'cliente'
+  const e = (isClient ? state.orders : state.prov.matches).find((x) => x.id === id)
+  const who = isClient ? firstName(pro(e.pro)) : e.d.cliente
+  const rated = !!e.chat.myRating
+
+  return (
+    <>
+      <SheetHead media={<span className="ic"><Lock size={20} /></span>} title="Termine o pedido anterior" />
+      <p style={{ marginTop: 0 }}>
+        {isClient ? 'Para fazer um novo pedido' : 'Para abrir uma nova conversa'}, o pedido firmado com {who} precisa ser avaliado por vocês dois.
+        Se faltar avaliação, ele fecha sozinho 1 dia depois de firmado.
       </p>
-      <button className="btn" onClick={act.sendProposal}><Send size={18} />Enviar proposta de {money(val)}</button>
+      {rated && <p className="muted small">Você já avaliou. Falta {who} avaliar.</p>}
+      <button className="btn" onClick={() => go(isClient ? 'openOrder' : 'openMatch', id)}>{rated ? 'Ver pedido' : `Avaliar ${who}`}</button>
     </>
   )
 }
@@ -180,7 +243,8 @@ export default function SheetHost() {
     <Sheet>
       {sheet.type === 'pro' && <ProSheet id={sheet.id} />}
       {sheet.type === 'order' && <OrderSheet id={sheet.id} />}
-      {sheet.type === 'prop' && <ProposalSheet id={sheet.id} val={sheet.val} />}
+      {sheet.type === 'match' && <MatchSheet id={sheet.id} />}
+      {sheet.type === 'lock' && <LockSheet side={sheet.side} id={sheet.id} />}
     </Sheet>
   )
 }

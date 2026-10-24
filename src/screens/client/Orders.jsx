@@ -1,16 +1,10 @@
 import { ClipboardList } from 'lucide-react'
 import { cat } from '../../data/catalog'
+import { dealStatus } from '../../lib/deal'
 import { whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, Pill } from '../../components/ui'
 
-export const ORDER_STATUS = {
-  buscando: ['Recebendo propostas', 'wait'],
-  confirmado: ['Confirmado', 'ok'],
-  caminho: ['A caminho', 'ok'],
-  avaliar: ['Avaliar', 'acc'],
-  concluido: ['Concluído', 'done'],
-}
 
 export default function Orders() {
   const { state, go } = useApp()
@@ -22,7 +16,7 @@ export default function Orders() {
         <div className="list">
           {state.orders.map((o) => {
             const c = cat(o.cat)
-            const [label, tone] = ORDER_STATUS[o.status]
+            const [label, tone] = dealStatus(o)
             return (
               <button key={o.id} className="ocard" onClick={() => go('openOrder', o.id)}>
                 <span className="ic"><c.Icon size={20} /></span>
