@@ -1,6 +1,6 @@
 import { BadgeCheck, Clock, MapPin, X } from 'lucide-react'
 import { cat, pro } from '../data/catalog'
-import { firstName, km, money } from '../lib/format'
+import { firstName, money } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, Rating } from '../components/ui'
 
@@ -14,7 +14,7 @@ export default function MatchOverlay() {
       <div className="overlay">
         <div className="match-c">
           <div className="radar"><span /><span /><span /><b><c.Icon size={32} /></b></div>
-          <h2>Avisando {o.offers.length + 5} profissionais perto de você</h2>
+          <h2>Avisando {o.offers.length + 5} profissionais da sua região</h2>
           <p className="muted">As propostas aparecem aqui. Você escolhe a melhor.</p>
         </div>
       </div>
@@ -43,7 +43,7 @@ export default function MatchOverlay() {
                       {p.nome}{p.ver && <BadgeCheck size={16} />}
                       {o.pro === p.id && <span className="tag">Você chamou</span>}
                     </div>
-                    <div className="pmeta"><Rating value={p.nota} count={p.qtd} /><span><MapPin size={14} /> {km(p.km)}</span></div>
+                    <div className="pmeta"><Rating value={p.nota} count={p.qtd} /><span><MapPin size={14} /> {p.bairro}</span></div>
                   </div>
                   <div className="price"><small>proposta</small>{money(f.preco)}</div>
                 </div>

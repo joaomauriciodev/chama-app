@@ -1,8 +1,9 @@
-import { ArrowLeft, Calendar, CalendarRange, Camera, Check, Mic, Pencil, Send, X } from 'lucide-react'
-import { ADDR, CATS, PERIODS, cat, pro } from '../data/catalog'
+import { ArrowLeft, Calendar, CalendarRange, Camera, Check, MapPinPlus, Mic, Pencil, Send, X } from 'lucide-react'
+import { ADDR, CATS, PERIODS, cat, place, pro } from '../data/catalog'
 import { dayChips, estimate, firstName, money, unit, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, CategoryTile, Chip, Stepper } from '../components/ui'
+import CepField from '../components/CepField'
 
 const STEPS = 5
 
@@ -83,6 +84,22 @@ function StepWhere({ d, go }) {
           <span className="radio" />
         </button>
       ))}
+      <button className={`addr ${d.where === 'cep' ? 'on' : ''}`} onClick={() => go('where', 'cep')} aria-pressed={d.where === 'cep'}>
+        <span className="ic sm"><MapPinPlus size={18} /></span>
+        <span><b>Outro endereço</b><small>Informe o CEP</small></span>
+        <span className="radio" />
+      </button>
+      {d.where === 'cep' && (
+        <div className="card">
+          <CepField value={d.addr} onFound={(a) => go('addr', a)} />
+          {d.addr && (
+            <label className="field" style={{ marginTop: 10 }}>
+              <small>Número</small>
+              <input inputMode="numeric" placeholder="Ex.: 120" value={d.addr.numero || ''} onChange={(e) => go('addr', { numero: e.target.value.trim() })} />
+            </label>
+          )}
+        </div>
+      )}
     </>
   )
 }
@@ -99,7 +116,7 @@ function SummaryRow({ icon: Icon, label, value, onClick }) {
 
 function StepReview({ d, go }) {
   const c = cat(d.cat)
-  const a = ADDR.find((x) => x.id === d.where)
+  const a = place(d)
   const [lo, hi] = estimate(d)
   const p = d.pro ? pro(d.pro) : null
   return (
@@ -109,7 +126,7 @@ function StepReview({ d, go }) {
       {p && <div className="banner"><Avatar person={p} />Pedido direto para {p.nome}</div>}
       <SummaryRow icon={c.Icon} label={c.nome} value={`${d.subs.join(', ')}, ${unit(c, d.qty)}`} onClick={() => go('goto', 1)} />
       <SummaryRow icon={Calendar} label="Quando" value={whenLabel(d)} onClick={() => go('goto', 2)} />
-      <SummaryRow icon={a.Icon} label="Onde" value={a.nome} onClick={() => go('goto', 3)} />
+      <SummaryRow icon={a.Icon} label="Onde" value={d.where === 'cep' ? `${a.nome}, ${d.addr.bairro}` : a.nome} onClick={() => go('goto', 3)} />
       <div className="est">
         <small>Estimativa pela média da região</small>
         <b>{money(lo)} a {money(hi)}</b>
@@ -129,7 +146,7 @@ export default function RequestFlow() {
     !!d.cat,
     d.subs.length > 0,
     !!d.when && (d.when === 'Flexível' || !!d.period),
-    !!d.where,
+    d.where !== 'cep' || !!d.addr?.numero,
     true,
   ][step]
   const View = STEP_VIEWS[step]

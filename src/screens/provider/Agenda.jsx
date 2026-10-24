@@ -45,7 +45,7 @@ export default function Agenda() {
           })}
         </div>
       ) : (
-        <Empty icon={Calendar} title="Agenda vazia">Envie propostas para os pedidos perto de você.</Empty>
+        <Empty icon={Calendar} title="Agenda vazia">Envie propostas para os pedidos da sua região.</Empty>
       )}
     </div>
   )

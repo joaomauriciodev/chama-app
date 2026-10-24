@@ -5,13 +5,13 @@ import { useApp } from '../../state/AppContext'
 import { CategoryTile, ProCard, RoleSwitch } from '../../components/ui'
 
 export function repeatOrder(go, o) {
-  go('startFlow', { cat: o.cat, pro: o.pro, step: 2, prefill: { subs: [...o.subs], qty: o.qty, where: o.where } })
+  go('startFlow', { cat: o.cat, pro: o.pro, step: 2, prefill: { subs: [...o.subs], qty: o.qty, where: o.where, addr: o.addr } })
 }
 
 export default function Home() {
   const { state, go } = useApp()
   const again = state.orders.filter((o) => o.status === 'concluido' && o.pro)
-  const near = [...PROS].sort((a, b) => a.km - b.km).slice(0, 4)
+  const top = [...PROS].sort((a, b) => b.nota - a.nota).slice(0, 4)
 
   return (
     <div className="screen">
@@ -25,7 +25,7 @@ export default function Home() {
 
       <section className="hero">
         <h1>Do que você precisa?</h1>
-        <p>Toque no serviço. Profissionais avaliados por perto respondem em minutos.</p>
+        <p>Toque no serviço. Profissionais avaliados da sua região respondem em minutos.</p>
       </section>
 
       <div className="catgrid">
@@ -56,8 +56,8 @@ export default function Home() {
         </>
       )}
 
-      <h2 className="sec">Perto de você agora</h2>
-      <div className="list">{near.map((p) => <ProCard key={p.id} p={p} />)}</div>
+      <h2 className="sec">Bem avaliados na sua região</h2>
+      <div className="list">{top.map((p) => <ProCard key={p.id} p={p} />)}</div>
     </div>
   )
 }

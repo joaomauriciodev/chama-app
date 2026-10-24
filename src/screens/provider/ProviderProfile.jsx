@@ -1,7 +1,8 @@
 import { BadgeCheck } from 'lucide-react'
-import { CATS, SHIFTS, WEEK } from '../../data/catalog'
+import { AREAS, CATS, SHIFTS, WEEK } from '../../data/catalog'
 import { useApp } from '../../state/AppContext'
 import { Avatar, CategoryTile } from '../../components/ui'
+import CepField from '../../components/CepField'
 
 export default function ProviderProfile() {
   const { state, go } = useApp()
@@ -25,10 +26,15 @@ export default function ProviderProfile() {
         ))}
       </div>
 
-      <h2 className="sec">Até onde você vai</h2>
+      <h2 className="sec">Onde você atende</h2>
       <div className="card">
-        <div className="rrow"><span>Raio de atendimento</span><b>{prov.radius} km</b></div>
-        <input type="range" min="2" max="30" step="1" value={prov.radius} onChange={(e) => go('radius', +e.target.value)} aria-label="Raio em km" />
+        <CepField value={prov.base} onFound={(a) => a && go('provBase', a)} />
+        <div className="seg wide" role="group" aria-label="Área de atendimento">
+          {AREAS.map((a) => (
+            <button key={a.id} className={prov.area === a.id ? 'on' : ''} onClick={() => go('area', a.id)} aria-pressed={prov.area === a.id}>{a.nome}</button>
+          ))}
+        </div>
+        <p className="muted small" style={{ margin: '8px 2px 0' }}>Você recebe pedidos de CEPs dentro dessa área.</p>
       </div>
 
       <h2 className="sec">Quando você trabalha</h2>

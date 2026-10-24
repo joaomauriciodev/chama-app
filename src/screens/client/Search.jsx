@@ -4,7 +4,7 @@ import { normalize } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Chip, Empty, ProCard } from '../../components/ui'
 
-const SORTS = [['perto', 'Mais perto'], ['nota', 'Melhor nota'], ['preco', 'Menor preço']]
+const SORTS = [['nota', 'Melhor nota'], ['qtd', 'Mais serviços'], ['preco', 'Menor preço']]
 
 function filterPros({ cat: catId, q, sort }) {
   let list = PROS.filter((p) => !catId || p.cats.includes(catId))
@@ -15,7 +15,7 @@ function filterPros({ cat: catId, q, sort }) {
       return normalize(haystack).includes(term)
     })
   }
-  const by = { perto: (a, b) => a.km - b.km, nota: (a, b) => b.nota - a.nota, preco: (a, b) => a.desde - b.desde }
+  const by = { nota: (a, b) => b.nota - a.nota, qtd: (a, b) => b.qtd - a.qtd, preco: (a, b) => a.desde - b.desde }
   return list.sort(by[sort])
 }
 

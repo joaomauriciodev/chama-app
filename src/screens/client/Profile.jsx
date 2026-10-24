@@ -20,7 +20,7 @@ export default function Profile() {
       ))}
       <section className="hero small" style={{ marginTop: 22 }}>
         <h1>Você também faz serviços?</h1>
-        <p>Monte seu perfil em poucos toques e receba pedidos perto de você.</p>
+        <p>Monte seu perfil em poucos toques e receba pedidos da sua região.</p>
         <button className="btn dark" onClick={() => go('role', 'prestador')}>Começar a trabalhar</button>
       </section>
     </div>

@@ -20,7 +20,7 @@ function Aside() {
   return (
     <aside className="side">
       <p className="logo">chama<span className="dot" /></p>
-      <p>Protótipo navegável de um app que liga quem precisa de um serviço a profissionais por perto. Quase tudo é toque: um pedido completo sai em cerca de seis toques, sem digitar nada.</p>
+      <p>Protótipo navegável de um app que liga quem precisa de um serviço a profissionais da mesma região, só pelo CEP. Quase tudo é toque: um pedido completo sai em cerca de seis toques, sem digitar nada.</p>
       <h2>Experimente</h2>
       <ol>
         <li><b>Peça uma montagem</b> pela tela inicial e escolha uma das propostas.</li>

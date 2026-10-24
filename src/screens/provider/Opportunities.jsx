@@ -1,6 +1,6 @@
-import { Calendar, Image, MapPin, Mic, Moon, Radar, Radius } from 'lucide-react'
-import { DEMANDS, cat } from '../../data/catalog'
-import { km, money, unit, whenLabel } from '../../lib/format'
+import { Calendar, Image, MapPin, MapPinned, Mic, Moon, Radar } from 'lucide-react'
+import { AREAS, DEMANDS, cat, inArea } from '../../data/catalog'
+import { money, unit, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
 
@@ -19,7 +19,7 @@ function DemandCard({ d }) {
       </div>
       <div className="dmeta">
         <span><Calendar size={14} />{whenLabel(d)}</span>
-        <span><MapPin size={14} />{d.bairro}, {km(d.km)}</span>
+        <span><MapPin size={14} />{d.bairro}</span>
         {d.foto && <span><Image size={14} />Com fotos</span>}
         {d.audio && <span><Mic size={14} />Com áudio</span>}
       </div>
@@ -35,7 +35,7 @@ export default function Opportunities() {
   const { state, go } = useApp()
   const { prov } = state
   const list = prov.online
-    ? DEMANDS.filter((d) => prov.cats.includes(d.cat) && d.km <= prov.radius && !prov.hidden.includes(d.id))
+    ? DEMANDS.filter((d) => prov.cats.includes(d.cat) && inArea(prov.base, prov.area, d) && !prov.hidden.includes(d.id))
     : []
   const earned = prov.agenda.filter((a) => a.status === 'feito').reduce((s, a) => s + a.valor, 0)
   const sent = prov.agenda.filter((a) => a.status === 'enviada').length
@@ -45,7 +45,7 @@ export default function Opportunities() {
       <header className="top">
         <div>
           <small>Olá, Lucas</small>
-          <span className="loc"><Radius size={16} /> Até {prov.radius} km</span>
+          <span className="loc"><MapPinned size={16} /> {prov.area === 'cidade' ? prov.base.cidade : `${AREAS.find((a) => a.id === prov.area).nome}: ${prov.base.bairro}`}</span>
         </div>
         <RoleSwitch />
       </header>
@@ -65,7 +65,7 @@ export default function Opportunities() {
         <div><small>Sua nota</small><b>4,9</b></div>
       </div>
 
-      <h2 className="sec">Pedidos perto de você {prov.online && <span className="n">{list.length}</span>}</h2>
+      <h2 className="sec">Pedidos na sua área {prov.online && <span className="n">{list.length}</span>}</h2>
 
       {!prov.online ? (
         <Empty icon={Moon} title="Você está pausado">Ative a disponibilidade para ver pedidos.</Empty>
@@ -73,7 +73,7 @@ export default function Opportunities() {
         <div className="list">{list.map((d) => <DemandCard key={d.id} d={d} />)}</div>
       ) : (
         <Empty icon={Radar} title="Nenhum pedido novo por enquanto" action={<button className="btn ghost" onClick={() => go('tab', 'pperfil')}>Ajustar perfil</button>}>
-          Aumente seu raio ou adicione serviços no perfil.
+          Amplie sua área ou adicione serviços no perfil.
         </Empty>
       )}
     </div>

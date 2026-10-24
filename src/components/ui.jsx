@@ -1,6 +1,6 @@
 import { BadgeCheck, Check, MapPin, Minus, Plus, Star } from 'lucide-react'
 import { AVATAR_COLORS, cat } from '../data/catalog'
-import { initials, km, money } from '../lib/format'
+import { initials, money } from '../lib/format'
 import { useApp } from '../state/AppContext'
 
 export function Avatar({ person, large }) {
@@ -29,7 +29,7 @@ export function ProCard({ p }) {
         <span className="pname">{p.nome}{p.ver && <BadgeCheck size={16} />}</span>
         <span className="pmeta">
           <Rating value={p.nota} count={p.qtd} />
-          <span><MapPin size={14} /> {km(p.km)}</span>
+          <span><MapPin size={14} /> {p.bairro}</span>
         </span>
         <span className="pcats">{p.cats.map((id) => cat(id).nome).join(', ')}</span>
       </span>

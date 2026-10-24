@@ -3,7 +3,6 @@ import { cat } from '../data/catalog'
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
 export const money = (n) => 'R$ ' + Math.round(n).toLocaleString('pt-BR')
-export const km = (n) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' km'
 export const firstName = (p) => p.nome.split(' ')[0]
 export const initials = (p) => p.nome.split(' ').map((w) => w[0]).slice(0, 2).join('')
 export const unit = (c, q) => `${q} ${q > 1 ? c.uns : c.un}`

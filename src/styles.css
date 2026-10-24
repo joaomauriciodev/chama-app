@@ -273,3 +273,18 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px}
 @keyframes pop{from{transform:scale(.94) translateY(6px);opacity:0}to{transform:none;opacity:1}}
 @keyframes ping{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.15);opacity:0}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* CEP */
+.field{display:block;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:8px 14px}
+.field:focus-within{border-color:var(--ink)}
+.field small{display:block;font-size:12px;font-weight:600;color:var(--muted)}
+.field input{width:100%;border:0;background:none;outline:none;padding:2px 0;font-size:16px;font-weight:600}
+.cep-msg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin:10px 2px 0}
+.cep-msg.err{color:#E5484D;font-weight:600}
+.cep-msg.ok{align-items:flex-start;color:var(--ink)}
+.cep-msg.ok svg{color:var(--ok);margin-top:2px}
+.cep-msg.ok b{display:block;color:var(--ink)}
+.cep-msg.ok span{color:var(--muted)}
+.card .cep + .seg{margin-top:14px}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}

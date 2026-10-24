@@ -13,22 +13,23 @@ export const initialState = {
   draft: null, // pedido em montagem
   sheet: null, // { type: 'pro' | 'order' | 'prop', id, val? }
   match: null, // { id, phase: 'busca' | 'ofertas' }
-  search: { cat: null, sort: 'perto', q: '' },
+  search: { cat: null, sort: 'nota', q: '' },
   orders: [
     { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 3, when: '15 set', period: 'Manhã', where: 'casa', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
   ],
   prov: {
     online: true,
     cats: ['montagem', 'reparos', 'eletrica'],
-    radius: 8,
+    base: { cep: '01310-100', rua: 'Avenida Paulista', bairro: 'Bela Vista', cidade: 'São Paulo', uf: 'SP' },
+    area: 'regiao', // 'bairro' | 'regiao' | 'cidade'
     avail,
-    agenda: [{ key: 0, d: { id: 'd0', cat: 'montagem', subs: ['Cama'], qty: 1, when: 'Seg 5', period: 'Manhã', bairro: 'Centro', km: 2 }, valor: 90, status: 'feito' }],
+    agenda: [{ key: 0, d: { id: 'd0', cat: 'montagem', subs: ['Cama'], qty: 1, when: 'Seg 5', period: 'Manhã', bairro: 'Bela Vista', cep: '01310-200', cidade: 'São Paulo' }, valor: 90, status: 'feito' }],
     hidden: [],
   },
 }
 
 export const newDraft = (catId = null, proId = null) => ({
-  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', foto: false, audio: false, pro: proId,
+  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', addr: null, foto: false, audio: false, pro: proId,
 })
 
 const toggle = (list, v) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
@@ -55,6 +56,7 @@ export function reducer(state, { type, v }) {
     case 'toggleExtra': d[v] = !d[v]; break
     case 'when': d.when = v; if (v === 'Flexível') d.period = null; break
     case 'period': case 'where': d[type] = v; break
+    case 'addr': d.addr = v ? { ...d.addr, ...v } : null; break
     case 'next':
       if (s.flow.back === 4) { s.flow.step = 4; s.flow.back = null } else s.flow.step++
       break
@@ -123,7 +125,8 @@ export function reducer(state, { type, v }) {
     case 'agendaStatus': s.prov.agenda.find((a) => a.key === v.key).status = v.status; break
     case 'toggleProvCat': s.prov.cats = toggle(s.prov.cats, v); break
     case 'toggleAvail': s.prov.avail[v] = !s.prov.avail[v]; break
-    case 'radius': s.prov.radius = v; break
+    case 'area': s.prov.area = v; break
+    case 'provBase': s.prov.base = v; break
     default: return state
   }
   return s

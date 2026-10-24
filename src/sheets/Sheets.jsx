@@ -1,5 +1,5 @@
 import { Calendar, FastForward, Hand, RotateCcw, Send, Star, X } from 'lucide-react'
-import { ADDR, QUICK_REPLIES, RATING_TAGS, REVIEWS, cat, demand, pro } from '../data/catalog'
+import { QUICK_REPLIES, RATING_TAGS, REVIEWS, cat, demand, place, pro } from '../data/catalog'
 import { firstName, money, round5, unit, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, Chip, Stepper } from '../components/ui'
@@ -67,7 +67,7 @@ function OrderSheet({ id }) {
   const o = state.orders.find((x) => x.id === id)
   const c = cat(o.cat)
   const p = o.pro ? pro(o.pro) : null
-  const a = ADDR.find((x) => x.id === o.where)
+  const a = place(o)
   const steps = ['Pedido publicado', 'Profissional confirmado', 'A caminho', 'Concluído']
   const idx = { buscando: 0, confirmado: 1, caminho: 2, avaliar: 3, concluido: 3 }[o.status]
 
