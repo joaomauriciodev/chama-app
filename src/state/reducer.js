@@ -17,16 +17,25 @@ export const initialState = {
   orders: [
     { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 3, when: '15 set', period: 'Manhã', where: 'casa', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
   ],
+  signup: null, // cadastro de prestador em andamento
   prov: {
+    registered: false, // só vira prestador depois do cadastro + plano
+    nome: null,
+    tel: null,
+    plan: null, // { meses, until }
     online: true,
-    cats: ['montagem', 'reparos', 'eletrica'],
-    base: { cep: '01310-100', rua: 'Avenida Paulista', bairro: 'Bela Vista', cidade: 'São Paulo', uf: 'SP' },
+    cats: [],
+    base: null, // endereço do CEP base
     area: 'regiao', // 'bairro' | 'regiao' | 'cidade'
     avail,
-    agenda: [{ key: 0, d: { id: 'd0', cat: 'montagem', subs: ['Cama'], qty: 1, when: 'Seg 5', period: 'Manhã', bairro: 'Bela Vista', cep: '01310-200', cidade: 'São Paulo' }, valor: 90, status: 'feito' }],
+    agenda: [],
     hidden: [],
   },
 }
+
+const newSignup = (prov) => ({
+  step: 0, nome: '', tel: '', cats: [], base: null, area: 'regiao', avail: { ...prov.avail }, plan: 6, pay: 'Pix', paying: false, until: null,
+})
 
 export const newDraft = (catId = null, proId = null) => ({
   cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', addr: null, foto: false, audio: false, pro: proId,
@@ -42,7 +51,29 @@ export function reducer(state, { type, v }) {
   switch (type) {
     // navegação
     case 'tab': s.tab = v; s.sheet = null; break
-    case 'role': s.role = v; s.tab = v === 'cliente' ? 'inicio' : 'opps'; s.sheet = null; break
+    case 'role':
+      s.sheet = null
+      if (v === 'prestador' && !s.prov.registered) { s.signup = newSignup(s.prov); break }
+      s.role = v; s.tab = v === 'cliente' ? 'inicio' : 'opps'
+      break
+
+    // cadastro do prestador
+    case 'su': Object.assign(s.signup, v); break
+    case 'suCat': s.signup.cats = toggle(s.signup.cats, v); break
+    case 'suAvail': s.signup.avail[v] = !s.signup.avail[v]; break
+    case 'suNext': s.signup.step++; break
+    case 'suBack': if (s.signup.step > 0) s.signup.step--; else s.signup = null; break
+    case 'closeSignup': s.signup = null; break
+    case 'suPaid': Object.assign(s.signup, { paying: false, until: v, step: 5 }); break
+    case 'finishSignup': {
+      const u = s.signup
+      Object.assign(s.prov, {
+        registered: true, nome: u.nome.trim(), tel: u.tel, cats: u.cats, base: u.base, area: u.area, avail: u.avail,
+        plan: { meses: u.plan, until: u.until }, online: true,
+      })
+      s.signup = null; s.role = 'prestador'; s.tab = 'opps'
+      break
+    }
 
     // fluxo de pedido
     case 'startFlow':

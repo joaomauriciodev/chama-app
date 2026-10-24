@@ -82,6 +82,13 @@ export const REVIEWS = [
   ['Diego', 'Educado e atencioso do começo ao fim.'],
 ]
 export const AVATAR_COLORS = ['#FFD66B', '#A8D8FF', '#B9F0C9', '#FFC2B3', '#D9C8FF', '#FFE0A3', '#BDEBEA']
+// Planos de divulgação do prestador (preço por mês, pago à vista pelo período).
+export const PLANS = [
+  { meses: 3, mensal: 39.9 },
+  { meses: 6, mensal: 34.9, tag: 'Mais escolhido' },
+  { meses: 12, mensal: 29.9, tag: 'Melhor preço' },
+]
+export const PAY_METHODS = ['Pix', 'Cartão de crédito']
 export const WEEK = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 export const SHIFTS = [['M', 'Manhã'], ['T', 'Tarde'], ['N', 'Noite']]
 

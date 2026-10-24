@@ -9,6 +9,7 @@ import Agenda from './screens/provider/Agenda'
 import ProviderProfile from './screens/provider/ProviderProfile'
 import RequestFlow from './flows/RequestFlow'
 import MatchOverlay from './flows/MatchOverlay'
+import SignupFlow from './flows/SignupFlow'
 import SheetHost from './sheets/Sheets'
 
 const SCREENS = {
@@ -27,6 +28,7 @@ function Phone() {
         <TabBar />
         {state.flow && <RequestFlow />}
         {state.match && <MatchOverlay />}
+        {state.signup && <SignupFlow />}
         {state.sheet && <SheetHost />}
       </div>
       <Toast />

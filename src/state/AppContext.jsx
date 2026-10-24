@@ -55,6 +55,12 @@ export function AppProvider({ children }) {
         toast('O cliente aceitou sua proposta', 'party')
       }, 3500)
     },
+    subscribe(meses) {
+      go('su', { paying: true })
+      const until = new Date()
+      until.setMonth(until.getMonth() + meses)
+      setTimeout(() => go('suPaid', until.toISOString()), 1500)
+    },
     agendaStep(item) {
       const next = item.status === 'aceita' ? 'caminho' : 'feito'
       go('agendaStatus', { key: item.key, status: next })

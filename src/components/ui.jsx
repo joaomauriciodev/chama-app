@@ -1,5 +1,5 @@
 import { BadgeCheck, Check, MapPin, Minus, Plus, Star } from 'lucide-react'
-import { AVATAR_COLORS, cat } from '../data/catalog'
+import { AREAS, AVATAR_COLORS, SHIFTS, WEEK, cat } from '../data/catalog'
 import { initials, money } from '../lib/format'
 import { useApp } from '../state/AppContext'
 
@@ -90,4 +90,34 @@ export function RoleSwitch() {
 
 export function Pill({ tone, children, style }) {
   return <span className={`pill ${tone}`} style={style}>{children}</span>
+}
+
+export function AreaPicker({ value, onChange }) {
+  return (
+    <>
+      <div className="seg wide" role="group" aria-label="Área de atendimento">
+        {AREAS.map((a) => (
+          <button key={a.id} className={value === a.id ? 'on' : ''} onClick={() => onChange(a.id)} aria-pressed={value === a.id}>{a.nome}</button>
+        ))}
+      </div>
+      <p className="muted small" style={{ margin: '8px 2px 0' }}>Você recebe pedidos de CEPs dentro dessa área.</p>
+    </>
+  )
+}
+
+export function AvailGrid({ avail, onToggle }) {
+  return (
+    <div className="avail">
+      <span />
+      {WEEK.map((d) => <span key={d}>{d}</span>)}
+      {SHIFTS.map(([k, label]) => [
+        <span key={k}>{label}</span>,
+        ...WEEK.map((d) => {
+          const id = d + k
+          const on = !!avail[id]
+          return <button key={id} className={on ? 'on' : ''} onClick={() => onToggle(id)} aria-label={`${d} ${label}`} aria-pressed={on} />
+        }),
+      ])}
+    </div>
+  )
 }

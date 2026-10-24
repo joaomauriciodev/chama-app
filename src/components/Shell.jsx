@@ -62,8 +62,9 @@ export function useEscape() {
       if (e.key !== 'Escape') return
       if (state.sheet) go('closeSheet')
       else if (state.flow) go('closeFlow')
+      else if (state.signup && !state.signup.paying && state.signup.step < 5) go('closeSignup')
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [state.sheet, state.flow, go])
+  }, [state.sheet, state.flow, state.signup, go])
 }

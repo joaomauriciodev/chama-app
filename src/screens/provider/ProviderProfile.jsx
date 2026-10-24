@@ -1,7 +1,8 @@
-import { BadgeCheck } from 'lucide-react'
-import { AREAS, CATS, SHIFTS, WEEK } from '../../data/catalog'
+import { BadgeCheck, Megaphone, Phone } from 'lucide-react'
+import { CATS } from '../../data/catalog'
+import { dateLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
-import { Avatar, CategoryTile } from '../../components/ui'
+import { AreaPicker, AvailGrid, Avatar, CategoryTile } from '../../components/ui'
 import CepField from '../../components/CepField'
 
 export default function ProviderProfile() {
@@ -12,11 +13,17 @@ export default function ProviderProfile() {
     <div className="screen">
       <h1 className="title">Seu perfil</h1>
       <div className="me">
-        <Avatar person={{ id: 5, nome: 'Lucas Prado' }} large />
+        <Avatar person={{ id: 5, nome: prov.nome }} large />
         <div>
-          <b>Lucas Prado</b>
-          <span className="muted small" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><BadgeCheck size={15} /> Identidade verificada</span>
+          <b>{prov.nome}</b>
+          <span className="muted small" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Phone size={14} /> {prov.tel}</span>
+          <span className="muted small" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><BadgeCheck size={15} /> Verificação em andamento</span>
         </div>
+      </div>
+
+      <div className="plan-card">
+        <span className="ic sm"><Megaphone size={18} /></span>
+        <span><small>Plano de divulgação</small><b>{prov.plan.meses} meses, ativo até {dateLabel(prov.plan.until)}</b></span>
       </div>
 
       <h2 className="sec">Serviços que você faz</h2>
@@ -29,27 +36,11 @@ export default function ProviderProfile() {
       <h2 className="sec">Onde você atende</h2>
       <div className="card">
         <CepField value={prov.base} onFound={(a) => a && go('provBase', a)} />
-        <div className="seg wide" role="group" aria-label="Área de atendimento">
-          {AREAS.map((a) => (
-            <button key={a.id} className={prov.area === a.id ? 'on' : ''} onClick={() => go('area', a.id)} aria-pressed={prov.area === a.id}>{a.nome}</button>
-          ))}
-        </div>
-        <p className="muted small" style={{ margin: '8px 2px 0' }}>Você recebe pedidos de CEPs dentro dessa área.</p>
+        <AreaPicker value={prov.area} onChange={(a) => go('area', a)} />
       </div>
 
       <h2 className="sec">Quando você trabalha</h2>
-      <div className="avail">
-        <span />
-        {WEEK.map((d) => <span key={d}>{d}</span>)}
-        {SHIFTS.map(([k, label]) => [
-          <span key={k}>{label}</span>,
-          ...WEEK.map((d) => {
-            const id = d + k
-            const on = !!prov.avail[id]
-            return <button key={id} className={on ? 'on' : ''} onClick={() => go('toggleAvail', id)} aria-label={`${d} ${label}`} aria-pressed={on} />
-          }),
-        ])}
-      </div>
+      <AvailGrid avail={prov.avail} onToggle={(id) => go('toggleAvail', id)} />
       <p className="muted small" style={{ marginTop: 14 }}>Tudo é salvo na hora.</p>
     </div>
   )

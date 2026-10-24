@@ -2,6 +2,9 @@ import { cat } from '../data/catalog'
 
 const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
+export const price = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+export const maskPhone = (v) => v.replace(/\D/g, '').slice(0, 11).replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
+export const dateLabel = (iso) => new Date(iso).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '')
 export const money = (n) => 'R$ ' + Math.round(n).toLocaleString('pt-BR')
 export const firstName = (p) => p.nome.split(' ')[0]
 export const initials = (p) => p.nome.split(' ').map((w) => w[0]).slice(0, 2).join('')

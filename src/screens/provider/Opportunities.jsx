@@ -1,6 +1,6 @@
 import { Calendar, Image, MapPin, MapPinned, Mic, Moon, Radar } from 'lucide-react'
 import { AREAS, DEMANDS, cat, inArea } from '../../data/catalog'
-import { money, unit, whenLabel } from '../../lib/format'
+import { firstName, money, unit, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
 
@@ -44,7 +44,7 @@ export default function Opportunities() {
     <div className="screen">
       <header className="top">
         <div>
-          <small>Olá, Lucas</small>
+          <small>Olá, {firstName(prov)}</small>
           <span className="loc"><MapPinned size={16} /> {prov.area === 'cidade' ? prov.base.cidade : `${AREAS.find((a) => a.id === prov.area).nome}: ${prov.base.bairro}`}</span>
         </div>
         <RoleSwitch />
