@@ -1,6 +1,6 @@
 import { Calendar, FastForward, Hand, RotateCcw, Send, Star, X } from 'lucide-react'
-import { QUICK_REPLIES, RATING_TAGS, REVIEWS, cat, demand, place, pro } from '../data/catalog'
-import { firstName, money, round5, unit, whenLabel } from '../lib/format'
+import { QUICK_REPLIES, RATING_TAGS, REVIEWS, ROOMS, cat, demand, place, pro } from '../data/catalog'
+import { firstName, money, round5, size, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, Chip, Stepper } from '../components/ui'
 import { Sheet } from '../components/Shell'
@@ -73,7 +73,7 @@ function OrderSheet({ id }) {
 
   return (
     <>
-      <SheetHead media={<span className="ic"><c.Icon size={20} /></span>} title={c.nome} subtitle={`${o.subs.join(', ')}, ${unit(c, o.qty)}`} />
+      <SheetHead media={<span className="ic"><c.Icon size={20} /></span>} title={c.nome} subtitle={`${o.subs.join(', ')}, ${size(c, o)}`} />
 
       {p ? (
         <button className="pcard" onClick={() => go('openPro', p.id)} style={{ marginBottom: 10 }}>
@@ -148,7 +148,15 @@ function ProposalSheet({ id, val }) {
 
   return (
     <>
-      <SheetHead media={<span className="ic"><c.Icon size={20} /></span>} title={d.subs.join(', ')} subtitle={`${unit(c, d.qty)}, ${whenLabel(d)}, ${d.bairro}`} />
+      <SheetHead media={<span className="ic"><c.Icon size={20} /></span>} title={d.subs.join(', ')} subtitle={`${d.rooms ? '' : size(c, d) + ', '}${whenLabel(d)}, ${d.bairro}`} />
+      {d.rooms && (
+        <>
+          <h4>Imóvel</h4>
+          <div className="chips wrap">
+            {ROOMS.filter((r) => d.rooms[r.id]).map((r) => <span key={r.id} className="chip">{d.rooms[r.id]} {d.rooms[r.id] > 1 ? r.varios : r.um}</span>)}
+          </div>
+        </>
+      )}
       <h4>Seu valor</h4>
       <div className="chips wrap">
         {options.map(([v, label]) => (

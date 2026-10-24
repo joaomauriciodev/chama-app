@@ -1,6 +1,6 @@
 import { Calendar, Image, MapPin, MapPinned, Mic, Moon, Radar } from 'lucide-react'
 import { AREAS, DEMANDS, cat, inArea } from '../../data/catalog'
-import { firstName, money, unit, whenLabel } from '../../lib/format'
+import { firstName, money, size, whenLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
 
@@ -11,7 +11,7 @@ function DemandCard({ d }) {
     <article className="dcard">
       <div className="dtop">
         <span className="ic"><c.Icon size={20} /></span>
-        <div><b>{d.subs.join(', ')}</b><small>{c.nome}, {unit(c, d.qty)}</small></div>
+        <div><b>{d.subs.join(', ')}</b><small>{c.nome}, {size(c, d)}</small></div>
         <span className="val">
           {money(d.est[0])}<br />
           <small className="muted" style={{ fontFamily: 'var(--body)', fontWeight: 500 }}>até {money(d.est[1])}</small>

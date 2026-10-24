@@ -15,6 +15,21 @@ export const CATS = [
   { id: 'reparos', nome: 'Reparos', Icon: Wrench, subs: ['Suporte de TV', 'Cortina ou varão', 'Prateleira', 'Fechadura', 'Quadros'], un: 'item', uns: 'itens', preco: [40, 80] },
 ]
 
+// Cômodos pedidos quando a limpeza é residencial. `peso` ajusta a estimativa (banheiro e cozinha dão mais trabalho).
+export const ROOMS = [
+  { id: 'quartos', um: 'quarto', varios: 'quartos', peso: 1 },
+  { id: 'banheiros', um: 'banheiro', varios: 'banheiros', peso: 1.5 },
+  { id: 'salas', um: 'sala', varios: 'salas', peso: 1 },
+  { id: 'cozinhas', um: 'cozinha', varios: 'cozinhas', peso: 1.5 },
+  { id: 'servico', um: 'área de serviço', varios: 'áreas de serviço', peso: 0.5 },
+]
+export const ROOM_SUBS = ['Residencial']
+export const DEFAULT_ROOMS = { quartos: 2, banheiros: 1, salas: 1, cozinhas: 1, servico: 1 }
+
+// Mudanças pedem quantos móveis grandes; cada um soma esta faixa (R$) à estimativa.
+export const MOVING_SUBS = ['Mudança pequena', 'Mudança completa']
+export const BIG_FURNITURE_PRICE = [15, 25]
+
 // Prestadores fictícios (no app real viriam da API, filtrados pela área do CEP).
 export const PROS = [
   { id: 1, nome: 'Marcos Lima', cats: ['montagem', 'reparos'], nota: 4.9, qtd: 312, bairro: 'Bela Vista', desde: 60, ver: true, resp: '5 min' },
@@ -38,6 +53,8 @@ export const DEMANDS = [
   { id: 'd5', cat: 'limpeza', subs: ['Pós-obra'], qty: 4, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01301-000', cidade: 'São Paulo', est: [200, 280] },
   { id: 'd6', cat: 'eletrica', subs: ['Tomada', 'Luminária'], qty: 4, when: 'Flexível', period: null, bairro: 'Santana', cep: '02012-000', cidade: 'São Paulo', est: [120, 180] },
   { id: 'd7', cat: 'reparos', subs: ['Cortina ou varão'], qty: 2, when: 'Hoje', period: 'Tarde', bairro: 'Mooca', cep: '03101-000', cidade: 'São Paulo', est: [70, 100], foto: true },
+  { id: 'd9', cat: 'limpeza', subs: ['Residencial'], qty: 1, rooms: { quartos: 3, banheiros: 2, salas: 1, cozinhas: 1, servico: 1 }, when: 'Amanhã', period: 'Manhã', bairro: 'Consolação', cep: '01302-000', cidade: 'São Paulo', est: [270, 405], foto: true },
+  { id: 'd10', cat: 'frete', subs: ['Mudança pequena'], qty: 1, moveis: 6, when: 'Sábado', period: 'Manhã', bairro: 'Santa Cecília', cep: '01227-000', cidade: 'São Paulo', est: [210, 400] },
   { id: 'd8', cat: 'montagem', subs: ['Cama', 'Rack ou estante'], qty: 2, when: 'Amanhã', period: 'Tarde', bairro: 'Jardim Europa', cep: '01449-000', cidade: 'São Paulo', est: [140, 200] },
 ]
 

@@ -1,6 +1,6 @@
 import { ArrowLeft, Calendar, CalendarRange, Camera, Check, MapPinPlus, Mic, Pencil, Send, X } from 'lucide-react'
-import { ADDR, CATS, PERIODS, cat, place, pro } from '../data/catalog'
-import { dayChips, estimate, firstName, money, unit, whenLabel } from '../lib/format'
+import { ADDR, CATS, PERIODS, ROOMS, cat, place, pro } from '../data/catalog'
+import { dayChips, estimate, firstName, money, roomUnits, size, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, CategoryTile, Chip, Stepper } from '../components/ui'
 import CepField from '../components/CepField'
@@ -30,8 +30,31 @@ function StepDetails({ d, go }) {
         {c.subs.map((s) => <Chip key={s} on={d.subs.includes(s)} showCheck onClick={() => go('toggleSub', s)}>{s}</Chip>)}
       </div>
 
-      <h3 className="q2">Quantos {c.uns}?</h3>
-      <Stepper value={d.qty} onChange={(n) => go('qty', n)} />
+      {d.rooms ? (
+        <>
+          <h3 className="q2">Como é o imóvel?</h3>
+          <div className="rooms">
+            {ROOMS.map((r) => (
+              <div key={r.id} className="room">
+                <span>{r.varios[0].toUpperCase() + r.varios.slice(1)}</span>
+                <Stepper value={d.rooms[r.id]} onChange={(n) => go('room', { id: r.id, n })} labels={[`Menos ${r.varios}`, `Mais ${r.varios}`]} />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <h3 className="q2">Quantos {c.uns}?</h3>
+          <Stepper value={d.qty} onChange={(n) => go('qty', n)} />
+          {d.moveis != null && (
+            <>
+              <h3 className="q2">Quantos móveis grandes?</h3>
+              <p className="hint">Geladeira, fogão, sofá, guarda-roupa, cama, máquina de lavar…</p>
+              <Stepper value={d.moveis} onChange={(n) => go('moveis', n)} labels={['Menos móveis', 'Mais móveis']} />
+            </>
+          )}
+        </>
+      )}
 
       <h3 className="q2">Prefere mostrar a escrever?</h3>
       <div className="extras">
@@ -124,7 +147,7 @@ function StepReview({ d, go }) {
       <h2 className="q">Tudo certo?</h2>
       <p className="hint">Toque em uma linha para mudar.</p>
       {p && <div className="banner"><Avatar person={p} />Pedido direto para {p.nome}</div>}
-      <SummaryRow icon={c.Icon} label={c.nome} value={`${d.subs.join(', ')}, ${unit(c, d.qty)}`} onClick={() => go('goto', 1)} />
+      <SummaryRow icon={c.Icon} label={c.nome} value={`${d.subs.join(', ')}, ${size(c, d)}`} onClick={() => go('goto', 1)} />
       <SummaryRow icon={Calendar} label="Quando" value={whenLabel(d)} onClick={() => go('goto', 2)} />
       <SummaryRow icon={a.Icon} label="Onde" value={d.where === 'cep' ? `${a.nome}, ${d.addr.bairro}` : a.nome} onClick={() => go('goto', 3)} />
       <div className="est">
@@ -144,7 +167,7 @@ export default function RequestFlow() {
   const step = flow.step
   const canContinue = [
     !!d.cat,
-    d.subs.length > 0,
+    d.subs.length > 0 && (!d.rooms || roomUnits(d.rooms) > 0),
     !!d.when && (d.when === 'Flexível' || !!d.period),
     d.where !== 'cep' || !!d.addr?.numero,
     true,

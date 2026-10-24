@@ -1,4 +1,4 @@
-import { DEMANDS, WEEK, demand } from '../data/catalog'
+import { DEFAULT_ROOMS, DEMANDS, MOVING_SUBS, ROOM_SUBS, WEEK, demand } from '../data/catalog'
 import { estimate, midpoint } from '../lib/format'
 import { makeOffers } from '../lib/match'
 
@@ -15,7 +15,7 @@ export const initialState = {
   match: null, // { id, phase: 'busca' | 'ofertas' }
   search: { cat: null, sort: 'nota', q: '' },
   orders: [
-    { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 3, when: '15 set', period: 'Manhã', where: 'casa', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
+    { id: 1, cat: 'limpeza', subs: ['Residencial'], qty: 1, rooms: { quartos: 1, banheiros: 1, salas: 1, cozinhas: 0, servico: 0 }, when: '15 set', period: 'Manhã', where: 'casa', status: 'concluido', pro: 2, preco: 120, msgs: [], offers: [], rt: { stars: 5, tags: ['Caprichoso'] } },
   ],
   signup: null, // cadastro de prestador em andamento
   prov: {
@@ -38,10 +38,20 @@ const newSignup = (prov) => ({
 })
 
 export const newDraft = (catId = null, proId = null) => ({
-  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', addr: null, foto: false, audio: false, pro: proId,
+  cat: catId, subs: [], qty: 1, when: null, period: null, where: 'casa', addr: null, rooms: null, moveis: null, foto: false, audio: false, pro: proId,
 })
 
 const toggle = (list, v) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
+
+// Limpeza residencial pede os cômodos; mudança pede os móveis grandes; o resto usa só a quantidade.
+function syncDetails(d) {
+  const rooms = d.subs.some((x) => ROOM_SUBS.includes(x))
+  if (rooms && !d.rooms) d.rooms = { ...DEFAULT_ROOMS }
+  if (!rooms) d.rooms = null
+  const moving = d.subs.some((x) => MOVING_SUBS.includes(x))
+  if (moving && d.moveis == null) d.moveis = 2
+  if (!moving) d.moveis = null
+}
 
 export function reducer(state, { type, v }) {
   const s = structuredClone(state)
@@ -81,8 +91,10 @@ export function reducer(state, { type, v }) {
       s.flow = { step: v.step, start: v.step, only: v.only || null, back: null }
       s.sheet = null
       break
-    case 'pickCat': d.cat = v; d.subs = []; s.flow.step = 1; break
-    case 'toggleSub': d.subs = toggle(d.subs, v); break
+    case 'pickCat': d.cat = v; d.subs = []; d.rooms = null; d.moveis = null; s.flow.step = 1; break
+    case 'toggleSub': d.subs = toggle(d.subs, v); syncDetails(d); break
+    case 'moveis': d.moveis = Math.min(40, Math.max(0, d.moveis + v)); break
+    case 'room': d.rooms[v.id] = Math.min(10, Math.max(0, d.rooms[v.id] + v.n)); break
     case 'qty': d.qty = Math.min(20, Math.max(1, d.qty + v)); break
     case 'toggleExtra': d[v] = !d[v]; break
     case 'when': d.when = v; if (v === 'Flexível') d.period = null; break
