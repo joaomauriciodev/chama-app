@@ -1,31 +1,44 @@
-import { MapPin, RotateCcw } from 'lucide-react'
-import { CATS, PROS, cat, pro } from '../../data/catalog'
+import { RotateCcw, UserRoundSearch } from 'lucide-react'
+import { CATS, cat } from '../../data/catalog'
 import { firstName, money } from '../../lib/format'
+import { useApi } from '../../lib/useApi'
 import { useApp } from '../../state/AppContext'
-import { CategoryTile, ProCard, RoleSwitch } from '../../components/ui'
+import { CategoryTile, Empty, ProCard, RoleSwitch } from '../../components/ui'
 
-export function repeatOrder(go, o) {
-  go('startFlow', { cat: o.cat, pro: o.pro, step: 2, prefill: { subs: [...o.subs], qty: o.qty, rooms: o.rooms ? { ...o.rooms } : null, moveis: o.moveis ?? null, where: o.where, addr: o.addr } })
+// Repete um pedido concluído direto com o mesmo profissional, pulando para a data.
+export function repeatOrder(go, o, prestador) {
+  const { cep, rua, bairro, cidade, uf, numero, complemento } = o.endereco
+  go('startFlow', {
+    cat: o.categoria,
+    pro: { id: prestador.id, nome: prestador.nome },
+    step: 2,
+    prefill: { subs: [...o.subs], qty: o.qty, rooms: o.rooms, moveis: o.moveis, addr: { cep, rua, bairro, cidade, uf, numero, complemento } },
+  })
 }
 
 export default function Home() {
   const { state, go } = useApp()
-  const again = state.orders.filter((o) => o.status === 'concluido' && o.pro)
-  const top = [...PROS].sort((a, b) => b.nota - a.nota).slice(0, 4)
+  const top = useApi('/providers?sort=nota&limit=5')
+  const mine = useApi(state.auth ? '/me/orders' : null)
+  const again = (mine.data || [])
+    .filter((o) => o.situacao === 'concluido')
+    .map((o) => ({ o, f: o.conversas.find((c) => c.estado === 'concluido') }))
+    .filter((x) => x.f)
+    .slice(0, 5)
 
   return (
     <div className="screen">
       <header className="top">
         <div>
-          <small>Olá, Ana</small>
-          <span className="loc"><MapPin size={16} /> Rua das Palmeiras, 120</span>
+          <small>{state.auth ? `Olá, ${firstName(state.auth)}` : 'Olá!'}</small>
+          <span className="loc">Do que você precisa?</span>
         </div>
         <RoleSwitch />
       </header>
 
       <section className="hero">
-        <h1>Do que você precisa?</h1>
-        <p>Toque no serviço. Profissionais avaliados da sua região respondem em minutos.</p>
+        <h1>Chame um profissional</h1>
+        <p>Toque no serviço. Profissionais da sua região conversam com você e combinam o valor.</p>
       </section>
 
       <div className="catgrid">
@@ -38,15 +51,14 @@ export default function Home() {
         <>
           <h2 className="sec">Pedir de novo</h2>
           <div className="hscroll">
-            {again.map((o) => {
-              const p = pro(o.pro)
-              const c = cat(o.cat)
+            {again.map(({ o, f }) => {
+              const c = cat(o.categoria)
               return (
-                <button key={o.id} className="again" onClick={() => repeatOrder(go, o)}>
+                <button key={o.id} className="again" onClick={() => repeatOrder(go, o, f.prestador)}>
                   <span className="ic sm"><c.Icon size={18} /></span>
                   <span>
                     <b>{c.nome} {o.subs[0].toLowerCase()}</b>
-                    <small>com {firstName(p)}, {money(o.preco)}</small>
+                    <small>com {firstName(f.prestador)}, {money(f.valor)}</small>
                   </span>
                   <RotateCcw size={18} />
                 </button>
@@ -56,8 +68,14 @@ export default function Home() {
         </>
       )}
 
-      <h2 className="sec">Bem avaliados na sua região</h2>
-      <div className="list">{top.map((p) => <ProCard key={p.id} p={p} />)}</div>
+      <h2 className="sec">Bem avaliados</h2>
+      {top.data?.length ? (
+        <div className="list">{top.data.map((p) => <ProCard key={p.id} p={p} />)}</div>
+      ) : top.data ? (
+        <Empty icon={UserRoundSearch} title="Ainda não há profissionais disponíveis">Publique seu pedido: os profissionais da região são avisados.</Empty>
+      ) : (
+        <p className="muted small">{top.error ? top.error.message : 'Carregando…'}</p>
+      )}
     </div>
   )
 }

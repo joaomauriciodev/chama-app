@@ -2,7 +2,8 @@ import {
   Calendar, Check, ClipboardList, EyeOff, House, MessagesSquare, PartyPopper, Radar, Search, Send, User, UserCog, Wallet, Bell,
 } from 'lucide-react'
 import { useEffect } from 'react'
-import { needsAction } from '../lib/deal'
+import { convNeedsAction, orderNeedsAction } from '../lib/deal'
+import { useApi } from '../lib/useApi'
 import { useApp } from '../state/AppContext'
 
 const CLIENT_TABS = [['inicio', House, 'Início'], ['buscar', Search, 'Buscar'], ['pedidos', ClipboardList, 'Pedidos'], ['perfil', User, 'Perfil']]
@@ -12,7 +13,12 @@ export function TabBar() {
   const { state, go } = useApp()
   const isClient = state.role === 'cliente'
   const tabs = isClient ? CLIENT_TABS : PROVIDER_TABS
-  const badge = (isClient ? state.orders : state.prov.matches).filter(needsAction).length
+  const logged = !!state.auth
+  const orders = useApi(logged && isClient ? '/me/orders' : null, { poll: 15000 }).data
+  const convs = useApi(logged && !isClient && state.prov.registered ? '/me/conversations' : null, { poll: 15000 }).data
+  const badge = isClient
+    ? (orders || []).filter(orderNeedsAction).length
+    : (convs || []).filter((c) => convNeedsAction(c, 'prestador')).length
   const badgeTab = isClient ? 'pedidos' : 'agenda'
 
   return (
@@ -59,11 +65,12 @@ export function useEscape() {
   useEffect(() => {
     const onKey = (e) => {
       if (e.key !== 'Escape') return
-      if (state.sheet) go('closeSheet')
+      if (state.login && !state.login.busy) go('closeLogin')
+      else if (state.sheet) go('closeSheet')
       else if (state.flow) go('closeFlow')
       else if (state.signup && !state.signup.paying && state.signup.step < 5) go('closeSignup')
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [state.sheet, state.flow, state.signup, go])
+  }, [state.sheet, state.flow, state.signup, state.login, go])
 }

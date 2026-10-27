@@ -1,39 +1,15 @@
-import { ArrowLeft, CreditCard, Megaphone, QrCode, X } from 'lucide-react'
-import { CATS, PAY_METHODS, PLANS } from '../data/catalog'
-import { dateLabel, firstName, maskPhone, price } from '../lib/format'
+import { ArrowLeft, Megaphone, X } from 'lucide-react'
+import { CATS, PLANS } from '../data/catalog'
+import { dateLabel, firstName, price } from '../lib/format'
 import { useApp } from '../state/AppContext'
-import { AreaPicker, AvailGrid, CategoryTile, Chip } from '../components/ui'
+import { AreaPicker, AvailGrid, CategoryTile } from '../components/ui'
 import CepField from '../components/CepField'
+import AccountForm, { accountValid } from '../components/AccountForm'
 
 const STEPS = 5
-const PAY_ICONS = { Pix: QrCode, 'Cartão de crédito': CreditCard }
 
 function StepAbout({ u, go }) {
-  const isNew = u.mode === 'novo'
-  return (
-    <>
-      <h2 className="q">{isNew ? 'Crie sua conta' : 'Entre na sua conta'}</h2>
-      <p className="hint">{isNew ? 'Os clientes veem seu nome, sua nota e seus serviços.' : 'Use o WhatsApp e a senha do seu cadastro.'}</p>
-      <div className="seg wide" role="group" aria-label="Conta" style={{ marginBottom: 14 }}>
-        <button className={isNew ? 'on' : ''} onClick={() => go('su', { mode: 'novo', error: null })}>Sou novo</button>
-        <button className={isNew ? '' : 'on'} onClick={() => go('su', { mode: 'entrar', error: null })}>Já tenho conta</button>
-      </div>
-      {isNew && (
-        <label className="field" style={{ marginBottom: 10 }}>
-          <small>Nome completo</small>
-          <input autoComplete="name" placeholder="Ex.: Lucas Prado" value={u.nome} onChange={(e) => go('su', { nome: e.target.value })} />
-        </label>
-      )}
-      <label className="field">
-        <small>WhatsApp</small>
-        <input inputMode="tel" autoComplete="tel-national" placeholder="(11) 90000-0000" value={u.tel} onChange={(e) => go('su', { tel: maskPhone(e.target.value) })} />
-      </label>
-      <label className="field" style={{ marginTop: 10 }}>
-        <small>Senha{isNew ? ' (mínimo 8 caracteres)' : ''}</small>
-        <input type="password" autoComplete={isNew ? 'new-password' : 'current-password'} value={u.senha} onChange={(e) => go('su', { senha: e.target.value })} />
-      </label>
-    </>
-  )
+  return <AccountForm f={u} set={(v) => go('su', v)} intro="Os clientes veem seu nome, sua nota e seus serviços." />
 }
 
 function StepServices({ u, go }) {
@@ -90,11 +66,7 @@ function StepPlan({ u, go }) {
           </button>
         )
       })}
-      <h3 className="q2">Como quer pagar?</h3>
-      <div className="chips wrap">
-        {PAY_METHODS.map((m) => <Chip key={m} on={u.pay === m} icon={PAY_ICONS[m]} onClick={() => go('su', { pay: m })}>{m}</Chip>)}
-      </div>
-      <p className="muted small" style={{ marginTop: 14 }}>Pagamento único pelo período, sem renovação automática.</p>
+      <div className="banner" style={{ marginTop: 14 }}>A cobrança ainda não está ativa: durante o lançamento o plano é liberado sem custo.</div>
     </>
   )
 }
@@ -121,9 +93,8 @@ export default function SignupFlow() {
 
   if (step === STEPS) return <div className="overlay" role="dialog" aria-label="Cadastro concluído"><Done u={u} go={go} /></div>
 
-  const phoneOk = u.tel.replace(/\D/g, '').length >= 10
   const canContinue = [
-    phoneOk && u.senha.length >= 8 && (u.mode === 'entrar' || u.nome.trim().split(/\s+/).length >= 2),
+    accountValid(u),
     u.cats.length > 0,
     !!u.base,
     Object.values(u.avail).some(Boolean),
@@ -151,7 +122,7 @@ export default function SignupFlow() {
           <button className="btn" onClick={() => go('suNext')} disabled={!canContinue}>Continuar</button>
         ) : (
           <button className="btn" onClick={() => act.subscribe(u)} disabled={u.paying}>
-            {u.paying ? 'Processando pagamento…' : `Assinar por ${price(plan.mensal * plan.meses)}`}
+            {u.paying ? 'Ativando…' : `Ativar plano de ${plan.meses} meses`}
           </button>
         )}
       </div>

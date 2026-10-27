@@ -1,21 +1,25 @@
-import { BadgeCheck, Check, MapPin, Minus, Plus, Star } from 'lucide-react'
+import { Check, MapPin, Minus, Plus, Star } from 'lucide-react'
 import { AREAS, AVATAR_COLORS, SHIFTS, WEEK, cat } from '../data/catalog'
-import { initials, money } from '../lib/format'
+import { initials } from '../lib/format'
 import { useApp } from '../state/AppContext'
+
+// Cor estável por pessoa (ids da API são uuid).
+const colorOf = (id) => AVATAR_COLORS[[...String(id)].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % AVATAR_COLORS.length]
 
 export function Avatar({ person, large }) {
   return (
-    <span className={`av ${large ? 'lg' : ''}`} style={{ background: AVATAR_COLORS[person.id % AVATAR_COLORS.length] }}>
+    <span className={`av ${large ? 'lg' : ''}`} style={{ background: colorOf(person.id ?? person.nome) }}>
       {initials(person)}
     </span>
   )
 }
 
 export function Rating({ value, count }) {
+  if (!count) return <span className="novo">Novo no Chama</span>
   return (
     <span>
       <Star size={14} className="st" /> {value.toFixed(1)}
-      {count != null && <em> ({count})</em>}
+      <em> ({count})</em>
     </span>
   )
 }
@@ -26,14 +30,13 @@ export function ProCard({ p }) {
     <button className="pcard" onClick={() => go('openPro', p.id)}>
       <Avatar person={p} />
       <span className="pmain">
-        <span className="pname">{p.nome}{p.ver && <BadgeCheck size={16} />}</span>
+        <span className="pname">{p.nome}</span>
         <span className="pmeta">
-          <Rating value={p.nota} count={p.qtd} />
+          <Rating value={p.nota} count={p.avaliacoes} />
           <span><MapPin size={14} /> {p.bairro}</span>
         </span>
-        <span className="pcats">{p.cats.map((id) => cat(id).nome).join(', ')}</span>
+        <span className="pcats">{p.categorias.map((id) => cat(id)?.nome).filter(Boolean).join(', ')}</span>
       </span>
-      <span className="pprice"><small>a partir de</small>{money(p.desde)}</span>
     </button>
   )
 }

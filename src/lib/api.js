@@ -13,9 +13,11 @@ export const session = {
 }
 
 export class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, data) {
     super(message)
     this.status = status
+    this.code = data?.code
+    this.conversationId = data?.conversationId
   }
 }
 
@@ -36,7 +38,7 @@ export async function api(path, { method = 'GET', body } = {}) {
   const data = await res.json().catch(() => null)
   if (!res.ok) {
     if (res.status === 401 && token) session.set(null)
-    throw new ApiError(data?.error || 'Algo deu errado. Tente de novo.', res.status)
+    throw new ApiError(data?.error || 'Algo deu errado. Tente de novo.', res.status, data)
   }
   return data
 }
@@ -53,6 +55,8 @@ export const profileToProv = (p) => ({
   area: p.area,
   avail: Object.fromEntries(p.disponibilidade.map((k) => [k, true])),
   online: p.online,
+  nota: p.nota,
+  avaliacoes: p.avaliacoes,
 })
 
 export const provToBody = (p) => ({

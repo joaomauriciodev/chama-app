@@ -326,3 +326,10 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px}
 .wa-sent{background:var(--ok-soft);align-items:flex-start;font-weight:500;margin-top:14px}
 .wa-sent svg{color:var(--ok);margin-top:2px}
 .btn.sim{margin-top:12px}
+
+/* dados reais */
+.novo{color:var(--muted);font-weight:600}
+.waiting{display:flex;align-items:center;gap:12px;background:var(--accent-soft);border-radius:16px;padding:12px 14px;font-size:14px;font-weight:500;margin:4px 0 6px}
+.waiting .ic{background:var(--accent);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(.9)}}
+.msg.them{background:var(--surface)}

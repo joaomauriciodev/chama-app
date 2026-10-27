@@ -8,7 +8,7 @@ import Opportunities from './screens/provider/Opportunities'
 import Agenda from './screens/provider/Agenda'
 import ProviderProfile from './screens/provider/ProviderProfile'
 import RequestFlow from './flows/RequestFlow'
-import MatchOverlay from './flows/MatchOverlay'
+import LoginFlow from './flows/LoginFlow'
 import SignupFlow from './flows/SignupFlow'
 import SheetHost from './sheets/Sheets'
 
@@ -27,9 +27,9 @@ function Phone() {
         <Screen key={state.tab} />
         <TabBar />
         {state.flow && <RequestFlow />}
-        {state.match && <MatchOverlay />}
         {state.signup && <SignupFlow />}
         {state.sheet && <SheetHost />}
+        {state.login && <LoginFlow />}
       </div>
       <Toast />
     </div>

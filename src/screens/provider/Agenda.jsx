@@ -1,29 +1,34 @@
 import { MessagesSquare } from 'lucide-react'
 import { cat } from '../../data/catalog'
-import { dealStatus } from '../../lib/deal'
+import { convStatus } from '../../lib/deal'
 import { money, whenLabel } from '../../lib/format'
+import { useApi } from '../../lib/useApi'
 import { useApp } from '../../state/AppContext'
 import { Empty, Pill } from '../../components/ui'
 
 // Conversas do prestador com clientes, da negociação até a avaliação.
 export default function Agenda() {
   const { state, go } = useApp()
-  const items = state.prov.matches
+  const { data: items, error } = useApi(state.prov.registered ? '/me/conversations' : null, { poll: 10000 })
 
   return (
     <div className="screen">
       <h1 className="title">Conversas</h1>
-      {items.length ? (
+      {error ? (
+        <p className="muted small">{error.message}</p>
+      ) : !items ? (
+        <p className="muted small">Carregando…</p>
+      ) : items.length ? (
         <div className="list">
           {items.map((m) => {
-            const c = cat(m.d.cat)
-            const [label, tone] = dealStatus(m)
+            const c = cat(m.pedido.categoria)
+            const [label, tone] = convStatus(m, 'prestador')
             return (
-              <button key={m.id} className="ocard" onClick={() => go('openMatch', m.id)}>
+              <button key={m.id} className="ocard" onClick={() => go('openConv', m.id)}>
                 <span className="ic"><c.Icon size={20} /></span>
                 <span className="om">
-                  <b>{m.d.cliente}: {m.d.subs.join(', ').toLowerCase()}</b>
-                  <small>{whenLabel(m.d)}, {m.d.bairro}{m.chat.valor ? `, ${money(m.chat.valor)}` : ''}</small>
+                  <b>{m.cliente}: {m.pedido.subs.join(', ').toLowerCase()}</b>
+                  <small>{whenLabel(m.pedido)}, {m.pedido.endereco.bairro}{m.valor ? `, ${money(m.valor)}` : ''}</small>
                 </span>
                 <Pill tone={tone}>{label}</Pill>
               </button>

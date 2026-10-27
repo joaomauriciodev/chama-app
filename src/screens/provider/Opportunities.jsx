@@ -1,12 +1,13 @@
-import { Calendar, Image, MapPin, MapPinned, MessageCircle, Mic, Moon, Radar } from 'lucide-react'
-import { AREAS, DEMANDS, cat, inArea } from '../../data/catalog'
+import { Calendar, MapPin, MapPinned, Megaphone, MessageCircle, Moon, Radar } from 'lucide-react'
+import { AREAS, cat } from '../../data/catalog'
 import { firstName, money, size, whenLabel } from '../../lib/format'
+import { useApi } from '../../lib/useApi'
 import { useApp } from '../../state/AppContext'
 import { Empty, RoleSwitch } from '../../components/ui'
 
 function DemandCard({ d }) {
   const { act } = useApp()
-  const c = cat(d.cat)
+  const c = cat(d.categoria)
   return (
     <article className="dcard">
       <div className="dtop">
@@ -14,17 +15,16 @@ function DemandCard({ d }) {
         <div><b>{d.subs.join(', ')}</b><small>{c.nome}, {size(c, d)}</small></div>
         <span className="val">
           {money(d.est[0])}<br />
-          <small className="muted" style={{ fontFamily: 'var(--body)', fontWeight: 500 }}>até {money(d.est[1])}</small>
+          <small className="muted">até {money(d.est[1])}</small>
         </span>
       </div>
       <div className="dmeta">
         <span><Calendar size={14} />{whenLabel(d)}</span>
-        <span><MapPin size={14} />{d.bairro}</span>
-        {d.foto && <span><Image size={14} />Com fotos</span>}
-        {d.audio && <span><Mic size={14} />Com áudio</span>}
+        <span><MapPin size={14} />{d.endereco.bairro}</span>
+        <span>{d.cliente}</span>
       </div>
       <div className="dact">
-        <button className="btn ghost sm" onClick={() => act.pass(d.id)}>Passar</button>
+        <button className="btn ghost sm" onClick={() => act.hide(d.id)}>Passar</button>
         <button className="btn sm" onClick={() => act.startChat(d.id)}><MessageCircle size={16} />Conversar</button>
       </div>
     </article>
@@ -34,11 +34,12 @@ function DemandCard({ d }) {
 export default function Opportunities() {
   const { state, go } = useApp()
   const { prov } = state
-  const list = prov.online
-    ? DEMANDS.filter((d) => prov.cats.includes(d.cat) && inArea(prov.base, prov.area, d) && !prov.hidden.includes(d.id))
-    : []
-  const earned = prov.matches.filter((m) => m.status !== 'conversa').reduce((sum, m) => sum + m.chat.valor, 0)
-  const talking = prov.matches.filter((m) => m.status === 'conversa').length
+  const feed = useApi(prov.registered ? '/provider/feed' : null, { poll: 15000 })
+  const convs = useApi(prov.registered ? '/me/conversations' : null).data || []
+  const earned = convs.filter((m) => m.estado === 'firmado' || m.estado === 'concluido').reduce((sum, m) => sum + m.valor, 0)
+  const talking = convs.filter((m) => m.estado === 'conversa').length
+  const list = feed.data || []
+  const noPlan = feed.error?.code === 'plano'
 
   return (
     <div className="screen">
@@ -62,18 +63,24 @@ export default function Opportunities() {
       <div className="stats3" style={{ marginTop: 10 }}>
         <div><small>Firmados</small><b>{money(earned)}</b></div>
         <div><small>Conversas</small><b>{talking}</b></div>
-        <div><small>Sua nota</small><b>4,9</b></div>
+        <div><small>Sua nota</small><b>{prov.avaliacoes ? prov.nota.toFixed(1).replace('.', ',') : '–'}</b></div>
       </div>
 
-      <h2 className="sec">Pedidos na sua área {prov.online && <span className="n">{list.length}</span>}</h2>
+      <h2 className="sec">Pedidos na sua área {prov.online && feed.data && <span className="n">{list.length}</span>}</h2>
 
-      {!prov.online ? (
+      {noPlan ? (
+        <Empty icon={Megaphone} title="Seu plano de divulgação não está ativo">Com o plano ativo você aparece para os clientes e recebe pedidos.</Empty>
+      ) : !prov.online ? (
         <Empty icon={Moon} title="Você está pausado">Ative a disponibilidade para ver pedidos.</Empty>
+      ) : feed.error ? (
+        <p className="muted small">{feed.error.message}</p>
+      ) : !feed.data ? (
+        <p className="muted small">Carregando…</p>
       ) : list.length ? (
         <div className="list">{list.map((d) => <DemandCard key={d.id} d={d} />)}</div>
       ) : (
         <Empty icon={Radar} title="Nenhum pedido novo por enquanto" action={<button className="btn ghost" onClick={() => go('tab', 'pperfil')}>Ajustar perfil</button>}>
-          Amplie sua área ou adicione serviços no perfil.
+          Os pedidos da sua área aparecem aqui. Amplie a área ou adicione serviços no perfil.
         </Empty>
       )}
     </div>
