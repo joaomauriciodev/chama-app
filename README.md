@@ -17,7 +17,7 @@ npm run build     # gera dist/ para deploy estático (Vercel, Netlify, etc.)
 ## O que dá para testar
 
 **Como cliente (Contratar)**
-1. Toque numa categoria → subtipos em chips, quantidade, foto/áudio → dia e período → endereço → revisão com estimativa e pagamento.
+1. Toque numa categoria → subtipos em chips, quantidade, foto/áudio → dia e período → endereço → revisão do pedido. O app não mostra preço nem estimativa: o valor é combinado entre cliente e prestador no chat.
 2. Publique: o radar avisa os profissionais e as propostas chegam em ~2 s.
 3. Escolha uma proposta, converse com respostas rápidas, simule "a caminho" e "concluído", avalie com estrelas e tags.
 4. "Pedir de novo" repete um pedido antigo pulando direto para a data.
@@ -25,7 +25,7 @@ npm run build     # gera dist/ para deploy estático (Vercel, Netlify, etc.)
 
 **Como prestador (Trabalhar)**
 1. Liga/desliga disponibilidade; feed mostra pedidos compatíveis com seus serviços e sua área (CEP).
-2. Envie proposta escolhendo entre três valores sugeridos + ajuste de R$ 10. O cliente "aceita" em ~3,5 s.
+2. Converse e envie uma proposta digitando o valor que você cobra.
 3. Agenda: iniciar trajeto e concluir serviço (mostra o valor líquido).
 4. Perfil: serviços, CEP base com área de atendimento (bairro, região ou cidade) e grade de disponibilidade, tudo por toques.
 
@@ -34,7 +34,7 @@ npm run build     # gera dist/ para deploy estático (Vercel, Netlify, etc.)
 ```
 src/
   data/catalog.js          categorias, prestadores, pedidos abertos, constantes
-  lib/format.js            moeda, datas, estimativa de preço
+  lib/format.js            moeda, datas, rótulos do pedido
   lib/match.js             regra (simulada) que gera as propostas de um pedido
   state/reducer.js         todo o estado do app e suas transições
   state/AppContext.jsx     provider, ações com efeitos (timers) e toasts

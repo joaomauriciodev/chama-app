@@ -1,7 +1,7 @@
 import { ArrowLeft, Calendar, CalendarRange, MapPin, Pencil, Send, X } from 'lucide-react'
 import { useState } from 'react'
 import { CATS, PERIODS, ROOMS, cat } from '../data/catalog'
-import { dayChips, estimate, firstName, money, roomUnits, size, whenLabel } from '../lib/format'
+import { dayChips, firstName, roomCount, size, whenLabel } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { Avatar, CategoryTile, Chip, Stepper } from '../components/ui'
 import CepField from '../components/CepField'
@@ -122,7 +122,6 @@ function SummaryRow({ icon: Icon, label, value, onClick }) {
 
 function StepReview({ d, go }) {
   const c = cat(d.cat)
-  const [lo, hi] = estimate(d)
   return (
     <>
       <h2 className="q">Tudo certo?</h2>
@@ -131,11 +130,7 @@ function StepReview({ d, go }) {
       <SummaryRow icon={c.Icon} label={c.nome} value={`${d.subs.join(', ')}, ${size(c, d)}`} onClick={() => go('goto', 1)} />
       <SummaryRow icon={Calendar} label="Quando" value={whenLabel(d)} onClick={() => go('goto', 2)} />
       <SummaryRow icon={MapPin} label="Onde" value={`${d.addr.rua}, ${d.addr.numero.trim()}, ${d.addr.bairro}`} onClick={() => go('goto', 3)} />
-      <div className="est">
-        <small>Estimativa pela média da região</small>
-        <b>{money(lo)} a {money(hi)}</b>
-        <small>O valor final você combina com o profissional no chat.</small>
-      </div>
+      <p className="hint" style={{ marginTop: 18 }}>O valor você combina direto com o profissional no chat.</p>
     </>
   )
 }
@@ -149,7 +144,7 @@ export default function RequestFlow() {
   const step = flow.step
   const canContinue = [
     !!d.cat,
-    d.subs.length > 0 && (!d.rooms || roomUnits(d.rooms) > 0),
+    d.subs.length > 0 && (!d.rooms || roomCount(d.rooms) > 0),
     !!d.when && (!d.data || !!d.periodo),
     !!d.addr?.numero?.trim(),
     true,

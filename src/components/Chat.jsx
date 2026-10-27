@@ -1,14 +1,14 @@
 import { BadgeDollarSign, Handshake, MessageCircle, Send, Star } from 'lucide-react'
 import { useState } from 'react'
-import { maskPhone, midpoint, money } from '../lib/format'
+import { maskPhone, money } from '../lib/format'
 import { useApp } from '../state/AppContext'
-import { Chip, Stepper } from './ui'
+import { Chip } from './ui'
 
 // Chat do match (dados de GET /conversations/:id). Aceitar a proposta do outro lado firma o pedido.
 export function Conversation({ conv, quick, who }) {
   const { act } = useApp()
   const [text, setText] = useState('')
-  const [val, setVal] = useState(null) // painel de proposta aberto com este valor
+  const [val, setVal] = useState(null) // painel de proposta aberto com este valor (texto digitado)
   const [sending, setSending] = useState(false)
   const open = conv.estado === 'conversa'
   const theirs = conv.propostaBy && conv.propostaBy !== conv.papel
@@ -47,16 +47,21 @@ export function Conversation({ conv, quick, who }) {
 
           {val != null ? (
             <div className="propose">
-              <Stepper value={money(val)} step={10} wide onChange={(n) => setVal(Math.max(10, val + n))} labels={['Menos 10 reais', 'Mais 10 reais']} />
+              <label className="field">
+                <small>Valor do serviço (R$)</small>
+                <input value={val} onChange={(ev) => setVal(ev.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="Digite o valor" autoFocus aria-label="Valor da proposta em reais" />
+              </label>
               <div className="propose-act">
                 <button className="btn ghost sm" onClick={() => setVal(null)}>Cancelar</button>
-                <button className="btn sm" onClick={() => { act.propose(conv.id, val); setVal(null) }}>Propor {money(val)}</button>
+                <button className="btn sm" disabled={!(Number(val) >= 10 && Number(val) <= 100000)} onClick={() => { act.propose(conv.id, Number(val)); setVal(null) }}>
+                  {val ? `Propor ${money(Number(val))}` : 'Propor'}
+                </button>
               </div>
             </div>
           ) : (
             <>
               <div className="qr">
-                <button className="chip" onClick={() => setVal(conv.propostaValor ?? midpoint(conv.pedido.est))}><BadgeDollarSign size={16} />Propor valor</button>
+                <button className="chip" onClick={() => setVal(conv.propostaValor ? String(conv.propostaValor) : '')}><BadgeDollarSign size={16} />Propor valor</button>
                 {quick.map((t) => <button key={t} className="chip" onClick={() => act.send(conv.id, t)}>{t}</button>)}
               </div>
               <form className="composer" onSubmit={send}>

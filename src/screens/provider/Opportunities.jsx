@@ -13,10 +13,6 @@ function DemandCard({ d }) {
       <div className="dtop">
         <span className="ic"><c.Icon size={20} /></span>
         <div><b>{d.subs.join(', ')}</b><small>{c.nome}, {size(c, d)}</small></div>
-        <span className="val">
-          {money(d.est[0])}<br />
-          <small className="muted">até {money(d.est[1])}</small>
-        </span>
       </div>
       <div className="dmeta">
         <span><Calendar size={14} />{whenLabel(d)}</span>

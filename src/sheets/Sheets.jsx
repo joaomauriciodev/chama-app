@@ -173,9 +173,7 @@ function ConvSheet({ id }) {
         <Avatar person={cv.outro} />
         <span className="rl">
           <b>{cv.outro.nome}</b>
-          {isClient
-            ? <small><Rating value={cv.outro.nota} count={cv.outro.avaliacoes} /></small>
-            : <small>Estimativa da região: {money(d.est[0])} a {money(d.est[1])}</small>}
+          {isClient && <small><Rating value={cv.outro.nota} count={cv.outro.avaliacoes} /></small>}
         </span>
         {isClient && <button className="btn ghost sm" style={{ width: 'auto' }} onClick={() => go('openOrder', d.id)}>Ver pedido</button>}
       </div>

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { api, getProfile, provToBody, session } from '../lib/api'
-import { estimate, firstName } from '../lib/format'
+import { firstName } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
 const AppContext = createContext(null)
@@ -19,7 +19,6 @@ const orderBody = (d) => ({
   cep: d.addr.cep,
   numero: d.addr.numero,
   ...(d.addr.complemento ? { complemento: d.addr.complemento } : {}),
-  est: estimate(d),
   ...(d.pro ? { prestadorId: d.pro.id } : {}),
 })
 
