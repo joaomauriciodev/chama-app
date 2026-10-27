@@ -4,7 +4,7 @@
 set -e
 url="${API_URL:-$VITE_API_URL}"
 if [ -z "$url" ]; then
-  echo "ERRO: defina a variável API_URL com o endereço público da chama-api (ex.: https://chama-api.up.railway.app)" >&2
+  echo "ERRO: defina a variável API_URL com o endereço público da chama-api (o domínio do serviço da API em Settings > Networking)" >&2
   exit 1
 fi
 case "$url" in
