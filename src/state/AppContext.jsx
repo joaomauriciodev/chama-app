@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { CLIENT_REPLIES, PRO_REPLIES } from '../data/catalog'
-import { round5 } from '../lib/format'
+import { api, getProfile, provToBody, session } from '../lib/api'
+import { firstName, round5 } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
 const AppContext = createContext(null)
@@ -69,14 +70,75 @@ export function AppProvider({ children }) {
         go('pass', id)
         toast('Pedido ocultado', 'eye-off')
       },
-      subscribe(meses) {
-        go('su', { paying: true })
-        const until = new Date()
-        until.setMonth(until.getMonth() + meses)
-        setTimeout(() => go('suPaid', until.toISOString()), 1500)
+      // Passo da conta no cadastro: cria a conta ou entra numa existente.
+      async account(u) {
+        go('su', { busy: true, error: null })
+        try {
+          const login = u.mode === 'entrar'
+          const res = await api(login ? '/auth/login' : '/auth/register', {
+            method: 'POST',
+            body: login ? { telefone: u.tel, senha: u.senha } : { nome: u.nome.trim(), telefone: u.tel, senha: u.senha },
+          })
+          session.set(res.token)
+          const profile = login ? await getProfile() : null
+          go('session', { user: res.user, profile })
+          if (profile) {
+            go('closeSignup')
+            go('role', 'prestador')
+            toast(`Bem-vindo de volta, ${firstName(res.user)}`)
+          } else {
+            go('su', { busy: false, step: 1, nome: res.user.nome, senha: '' })
+          }
+        } catch (err) {
+          go('su', { busy: false, error: err.message })
+        }
+      },
+      // Pagamento do plano ainda é simulado; o cadastro de serviços vai para a API.
+      async subscribe(u) {
+        go('su', { paying: true, error: null })
+        await new Promise((r) => setTimeout(r, 1500))
+        try {
+          await api('/me/provider', { method: 'PUT', body: provToBody({ ...u, online: true }) })
+          const until = new Date()
+          until.setMonth(until.getMonth() + u.plan)
+          go('suPaid', until.toISOString())
+        } catch (err) {
+          go('su', { paying: false, error: err.message })
+        }
+      },
+      logout() {
+        session.set(null)
+        go('logout')
+        toast('Você saiu da conta')
       },
     }
   }, [go, toast])
+
+  // Restaura a sessão salva ao abrir o app.
+  useEffect(() => {
+    if (!session.get()) return
+    Promise.all([api('/me'), getProfile()])
+      .then(([user, profile]) => go('session', { user, profile }))
+      .catch(() => {})
+  }, [go])
+
+  // Salva na API cada alteração do cadastro de serviços feita no perfil (com pequena espera entre toques).
+  const saved = useRef(null)
+  const { prov, auth } = state
+  const body = prov.registered && auth ? JSON.stringify(provToBody(prov)) : null
+  useEffect(() => {
+    if (!body) { saved.current = null; return }
+    if (saved.current === null) { saved.current = body; return } // recém carregado ou cadastrado: já está na API
+    if (body === saved.current) return
+    const b = JSON.parse(body)
+    if (!b.categorias.length || !b.disponibilidade.length) return
+    const t = setTimeout(() => {
+      api('/me/provider', { method: 'PUT', body: b })
+        .then(() => { saved.current = body })
+        .catch((err) => toast(err.message, 'bell'))
+    }, 700)
+    return () => clearTimeout(t)
+  }, [body, toast])
 
   const value = useMemo(() => ({ state, go, act, toastMsg }), [state, go, act, toastMsg])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

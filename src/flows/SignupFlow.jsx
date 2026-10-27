@@ -9,17 +9,28 @@ const STEPS = 5
 const PAY_ICONS = { Pix: QrCode, 'Cartão de crédito': CreditCard }
 
 function StepAbout({ u, go }) {
+  const isNew = u.mode === 'novo'
   return (
     <>
-      <h2 className="q">Como você se chama?</h2>
-      <p className="hint">Os clientes veem seu nome, sua nota e seus serviços.</p>
+      <h2 className="q">{isNew ? 'Crie sua conta' : 'Entre na sua conta'}</h2>
+      <p className="hint">{isNew ? 'Os clientes veem seu nome, sua nota e seus serviços.' : 'Use o WhatsApp e a senha do seu cadastro.'}</p>
+      <div className="seg wide" role="group" aria-label="Conta" style={{ marginBottom: 14 }}>
+        <button className={isNew ? 'on' : ''} onClick={() => go('su', { mode: 'novo', error: null })}>Sou novo</button>
+        <button className={isNew ? '' : 'on'} onClick={() => go('su', { mode: 'entrar', error: null })}>Já tenho conta</button>
+      </div>
+      {isNew && (
+        <label className="field" style={{ marginBottom: 10 }}>
+          <small>Nome completo</small>
+          <input autoComplete="name" placeholder="Ex.: Lucas Prado" value={u.nome} onChange={(e) => go('su', { nome: e.target.value })} />
+        </label>
+      )}
       <label className="field">
-        <small>Nome completo</small>
-        <input autoComplete="name" placeholder="Ex.: Lucas Prado" value={u.nome} onChange={(e) => go('su', { nome: e.target.value })} />
-      </label>
-      <label className="field" style={{ marginTop: 10 }}>
         <small>WhatsApp</small>
         <input inputMode="tel" autoComplete="tel-national" placeholder="(11) 90000-0000" value={u.tel} onChange={(e) => go('su', { tel: maskPhone(e.target.value) })} />
+      </label>
+      <label className="field" style={{ marginTop: 10 }}>
+        <small>Senha{isNew ? ' (mínimo 8 caracteres)' : ''}</small>
+        <input type="password" autoComplete={isNew ? 'new-password' : 'current-password'} value={u.senha} onChange={(e) => go('su', { senha: e.target.value })} />
       </label>
     </>
   )
@@ -110,8 +121,9 @@ export default function SignupFlow() {
 
   if (step === STEPS) return <div className="overlay" role="dialog" aria-label="Cadastro concluído"><Done u={u} go={go} /></div>
 
+  const phoneOk = u.tel.replace(/\D/g, '').length >= 10
   const canContinue = [
-    u.nome.trim().split(/\s+/).length >= 2 && u.tel.replace(/\D/g, '').length === 11,
+    phoneOk && u.senha.length >= 8 && (u.mode === 'entrar' || u.nome.trim().split(/\s+/).length >= 2),
     u.cats.length > 0,
     !!u.base,
     Object.values(u.avail).some(Boolean),
@@ -123,17 +135,22 @@ export default function SignupFlow() {
   return (
     <div className="overlay" role="dialog" aria-label="Cadastro de profissional">
       <div className="ohead">
-        <button className="iconbtn" onClick={() => go('suBack')} disabled={u.paying} aria-label="Voltar"><ArrowLeft size={20} /></button>
+        <button className="iconbtn" onClick={() => go('suBack')} disabled={u.paying || u.busy} aria-label="Voltar"><ArrowLeft size={20} /></button>
         <span className="lbl">Cadastro, passo {step + 1} de {STEPS}</span>
-        <button className="iconbtn" onClick={() => go('closeSignup')} disabled={u.paying} aria-label="Fechar"><X size={20} /></button>
+        <button className="iconbtn" onClick={() => go('closeSignup')} disabled={u.paying || u.busy} aria-label="Fechar"><X size={20} /></button>
       </div>
       <div className="prog">{Array.from({ length: STEPS }, (_, i) => <i key={i} className={i <= step ? 'on' : ''} />)}</div>
       <div className="obody"><View u={u} go={go} /></div>
       <div className="ofoot">
-        {step < STEPS - 1 ? (
+        {u.error && <p className="cep-msg err" style={{ margin: '0 2px 10px' }} role="alert">{u.error}</p>}
+        {step === 0 ? (
+          <button className="btn" onClick={() => act.account(u)} disabled={!canContinue || u.busy}>
+            {u.busy ? 'Aguarde…' : u.mode === 'entrar' ? 'Entrar' : 'Criar conta'}
+          </button>
+        ) : step < STEPS - 1 ? (
           <button className="btn" onClick={() => go('suNext')} disabled={!canContinue}>Continuar</button>
         ) : (
-          <button className="btn" onClick={() => act.subscribe(u.plan)} disabled={u.paying}>
+          <button className="btn" onClick={() => act.subscribe(u)} disabled={u.paying}>
             {u.paying ? 'Processando pagamento…' : `Assinar por ${price(plan.mensal * plan.meses)}`}
           </button>
         )}

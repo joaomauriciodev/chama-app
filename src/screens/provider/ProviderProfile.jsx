@@ -1,4 +1,4 @@
-import { BadgeCheck, Megaphone, Phone } from 'lucide-react'
+import { BadgeCheck, LogOut, Megaphone, Phone } from 'lucide-react'
 import { CATS } from '../../data/catalog'
 import { dateLabel } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
@@ -6,7 +6,7 @@ import { AreaPicker, AvailGrid, Avatar, CategoryTile } from '../../components/ui
 import CepField from '../../components/CepField'
 
 export default function ProviderProfile() {
-  const { state, go } = useApp()
+  const { state, go, act } = useApp()
   const { prov } = state
 
   return (
@@ -21,10 +21,12 @@ export default function ProviderProfile() {
         </div>
       </div>
 
-      <div className="plan-card">
-        <span className="ic sm"><Megaphone size={18} /></span>
-        <span><small>Plano de divulgação</small><b>{prov.plan.meses} meses, ativo até {dateLabel(prov.plan.until)}</b></span>
-      </div>
+      {prov.plan && (
+        <div className="plan-card">
+          <span className="ic sm"><Megaphone size={18} /></span>
+          <span><small>Plano de divulgação</small><b>{prov.plan.meses ? `${prov.plan.meses} meses, ativo` : 'Ativo'} até {dateLabel(prov.plan.until)}</b></span>
+        </div>
+      )}
 
       <h2 className="sec">Serviços que você faz</h2>
       <div className="catgrid">
@@ -41,7 +43,10 @@ export default function ProviderProfile() {
 
       <h2 className="sec">Quando você trabalha</h2>
       <AvailGrid avail={prov.avail} onToggle={(id) => go('toggleAvail', id)} />
-      <p className="muted small" style={{ marginTop: 14 }}>Tudo é salvo na hora.</p>
+      {!prov.cats.length || !Object.values(prov.avail).some(Boolean)
+        ? <p className="cep-msg err" style={{ marginTop: 14 }}>Escolha ao menos um serviço e um horário para salvar.</p>
+        : <p className="muted small" style={{ marginTop: 14 }}>Tudo é salvo na hora.</p>}
+      <button className="btn ghost" style={{ marginTop: 18 }} onClick={act.logout}><LogOut size={18} />Sair da conta</button>
     </div>
   )
 }

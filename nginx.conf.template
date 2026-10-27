@@ -1,0 +1,22 @@
+server {
+  listen ${PORT};
+  listen [::]:${PORT};
+  root /usr/share/nginx/html;
+
+  gzip on;
+  gzip_types text/css application/javascript image/svg+xml;
+
+  add_header X-Content-Type-Options nosniff always;
+  add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+  # Arquivos com hash no nome podem ficar em cache para sempre.
+  location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+  }
+
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache";
+  }
+}

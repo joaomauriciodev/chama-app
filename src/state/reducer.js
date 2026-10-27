@@ -1,6 +1,7 @@
 import { DEFAULT_ROOMS, MOVING_SUBS, ROOM_SUBS, WEEK, demand, pro } from '../data/catalog'
 import { addMsg, firmar, maybeClose, newChat } from '../lib/deal'
-import { estimate, firstName, midpoint } from '../lib/format'
+import { profileToProv } from '../lib/api'
+import { estimate, firstName, maskPhone, midpoint } from '../lib/format'
 import { makeOffers } from '../lib/match'
 
 const avail = {}
@@ -22,6 +23,7 @@ export const initialState = {
       chat: { ...newChat(120), valor: 120, firmadoEm: 0, myRating: { stars: 5, tags: ['Caprichoso'] }, theirRated: true },
     },
   ],
+  auth: null, // usuário logado na API ({ id, nome, telefone })
   signup: null, // cadastro de prestador em andamento
   prov: {
     registered: false, // só vira prestador depois do cadastro + plano
@@ -38,8 +40,10 @@ export const initialState = {
   },
 }
 
-const newSignup = (prov) => ({
-  step: 0, nome: '', tel: '', cats: [], base: null, area: 'regiao', avail: { ...prov.avail }, plan: 6, pay: 'Pix', paying: false, until: null,
+// Quem já está logado pula o passo da conta.
+const newSignup = (prov, auth) => ({
+  step: auth ? 1 : 0, mode: 'novo', nome: auth?.nome || '', tel: auth ? maskPhone(auth.telefone) : '', senha: '',
+  cats: [], base: null, area: 'regiao', avail: { ...prov.avail }, plan: 6, pay: 'Pix', paying: false, busy: false, error: null, until: null,
 })
 
 export const newDraft = (catId = null, proId = null) => ({
@@ -90,16 +94,31 @@ export function reducer(state, { type, v }) {
     case 'tab': s.tab = v; s.sheet = null; break
     case 'role':
       s.sheet = null
-      if (v === 'prestador' && !s.prov.registered) { s.signup = newSignup(s.prov); break }
+      if (v === 'prestador' && !s.prov.registered) { s.signup = newSignup(s.prov, s.auth); break }
       s.role = v; s.tab = v === 'cliente' ? 'inicio' : 'opps'
+      break
+
+    // sessão na API
+    case 'session':
+      s.auth = v.user
+      s.prov.nome = v.user.nome
+      s.prov.tel = maskPhone(v.user.telefone)
+      if (v.profile) {
+        Object.assign(s.prov, profileToProv(v.profile), { registered: true })
+        if (v.profile.planoAte) s.prov.plan = { meses: null, until: v.profile.planoAte }
+      }
+      break
+    case 'logout':
+      s.auth = null; s.prov = structuredClone(initialState.prov)
+      s.role = 'cliente'; s.tab = 'inicio'; s.sheet = null; s.signup = null
       break
 
     // cadastro do prestador
     case 'su': Object.assign(s.signup, v); break
     case 'suCat': s.signup.cats = toggle(s.signup.cats, v); break
     case 'suAvail': s.signup.avail[v] = !s.signup.avail[v]; break
-    case 'suNext': s.signup.step++; break
-    case 'suBack': if (s.signup.step > 0) s.signup.step--; else s.signup = null; break
+    case 'suNext': s.signup.step++; s.signup.error = null; break
+    case 'suBack': if (s.signup.step > (s.auth ? 1 : 0)) s.signup.step--; else s.signup = null; break
     case 'closeSignup': s.signup = null; break
     case 'suPaid': Object.assign(s.signup, { paying: false, until: v, step: 5 }); break
     case 'finishSignup': {
