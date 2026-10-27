@@ -1,5 +1,6 @@
 // Cliente da chama-api. A sessão (JWT) fica no navegador para sobreviver ao recarregar a página.
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+// O endereço vem de /config.js (gerado pela imagem Docker a partir de API_URL) ou, no dev, de VITE_API_URL.
+const BASE = window.CHAMA_CONFIG?.apiUrl || import.meta.env.VITE_API_URL || 'http://localhost:3000'
 const KEY = 'chama.token'
 
 export const session = {
