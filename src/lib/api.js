@@ -59,9 +59,13 @@ export const profileToProv = (p) => ({
   avaliacoes: p.avaliacoes,
 })
 
+// Endereço que o app já buscou pelo CEP; a API usa se não conseguir consultar o CEP no servidor.
+export const addrBody = (a) => ({ ...(a.rua && a.rua !== 'Endereço sem rua' ? { rua: a.rua } : {}), bairro: a.bairro, cidade: a.cidade, uf: a.uf })
+
 export const provToBody = (p) => ({
   categorias: p.cats,
   cep: p.base.cep,
+  endereco: addrBody(p.base),
   area: p.area,
   disponibilidade: Object.keys(p.avail).filter((k) => p.avail[k]),
   online: p.online,

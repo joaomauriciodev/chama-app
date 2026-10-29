@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { api, getProfile, provToBody, session } from '../lib/api'
+import { addrBody, api, getProfile, provToBody, session } from '../lib/api'
 import { firstName } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
@@ -18,6 +18,7 @@ const orderBody = (d) => ({
   audio: d.audio,
   cep: d.addr.cep,
   numero: d.addr.numero,
+  endereco: addrBody(d.addr),
   ...(d.addr.complemento ? { complemento: d.addr.complemento } : {}),
   ...(d.pro ? { prestadorId: d.pro.id } : {}),
 })
