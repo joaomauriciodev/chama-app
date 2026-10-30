@@ -264,7 +264,7 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px}
 .field input{width:100%;border:0;background:none;outline:none;padding:2px 0;font-size:16px;font-weight:600}
 .cep-msg{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin:10px 2px 0}
 .cep-msg.err{color:#E5484D;font-weight:600}
-.cep-msg .link{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
+.cep-msg .link{font-size:inherit;color:inherit}
 .cep-msg.ok{align-items:flex-start;color:var(--ink)}
 .cep-msg.ok svg{color:var(--ok);margin-top:2px}
 .cep-msg.ok b{display:block;color:var(--ink)}
@@ -331,3 +331,7 @@ input[type=range]{width:100%;accent-color:var(--ink);height:28px}
 @keyframes pulse{50%{transform:scale(.9)}}
 .msg.them{background:var(--surface)}
 .propose .field{width:100%}
+.code-input{font-family:var(--display);font-size:26px!important;letter-spacing:.35em;font-weight:800}
+.code-act{display:flex;justify-content:space-between;gap:12px;margin:12px 2px 0}
+.link{background:none;border:0;padding:0;font:inherit;font-size:13.5px;font-weight:700;color:var(--ink);text-decoration:underline;cursor:pointer}
+.link:disabled{color:var(--muted);text-decoration:none;cursor:default}

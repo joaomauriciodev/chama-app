@@ -11,7 +11,7 @@ Requer Node 20.19+ (ou 22.12+).
 ```bash
 npm install
 npm run dev       # http://localhost:5173
-npm run build     # gera dist/ para deploy estático (Vercel, Netlify, etc.)
+npm run build     # gera dist/ (em produção, a imagem Docker faz o build e serve com nginx no Railway)
 ```
 
 ## O que dá para testar

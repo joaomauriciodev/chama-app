@@ -1,9 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { addrBody, api, getProfile, provToBody, session } from '../lib/api'
+import { confirmPhoneCode, endPhoneSession, sendPhoneCode } from '../lib/phoneAuth'
 import { firstName } from '../lib/format'
 import { initialState, reducer } from './reducer'
 
 const AppContext = createContext(null)
+
+// Erros do cadastro que pedem outro SMS: limpa o código digitado.
+const NEW_CODE = ['codigo_expirado', 'verificacao_invalida']
 
 // Corpo de POST /orders a partir do rascunho do pedido.
 const orderBody = (d) => ({
@@ -47,13 +51,26 @@ export function AppProvider({ children }) {
       else toast(err.message, 'bell')
     }
 
-    // Cria a conta ou entra; devolve o perfil de prestador, se existir.
+    // Pede o SMS do cadastro (a API confere o número antes; o Firebase envia). `set` atualiza o formulário.
+    const sendCode = async (f, set) => {
+      set({ busy: true, error: null })
+      try {
+        await api('/auth/phone-check', { method: 'POST', body: { telefone: f.tel } })
+        await sendPhoneCode(f.tel)
+        set({ busy: false, codeSent: true, codigo: '', resendAt: Date.now() + 60_000 })
+      } catch (err) {
+        set({ busy: false, error: err.message })
+      }
+    }
+
+    // Cria a conta (código do SMS conferido pelo Firebase) ou entra; devolve o perfil de prestador, se existir.
     const authenticate = async (f) => {
       const login = f.mode === 'entrar'
-      const res = await api(login ? '/auth/login' : '/auth/register', {
-        method: 'POST',
-        body: login ? { telefone: f.tel, senha: f.senha } : { nome: f.nome.trim(), telefone: f.tel, senha: f.senha },
-      })
+      const body = login
+        ? { telefone: f.tel, senha: f.senha }
+        : { nome: f.nome.trim(), telefone: f.tel, senha: f.senha, firebaseToken: await confirmPhoneCode(f.codigo) }
+      const res = await api(login ? '/auth/login' : '/auth/register', { method: 'POST', body })
+      if (!login) endPhoneSession()
       session.set(res.token)
       const profile = login ? await getProfile() : null
       go('session', { user: res.user, profile })
@@ -88,8 +105,10 @@ export function AppProvider({ children }) {
     return {
       refresh,
       publish,
-      // Tela de entrar/criar conta aberta por uma ação que exige login.
+      sendCode,
+      // Tela de entrar/criar conta aberta por uma ação que exige login. Conta nova: primeiro o SMS, depois o código.
       async login(f) {
+        if (f.mode === 'novo' && !f.codeSent) return sendCode(f, (v) => go('lg', v))
         go('lg', { busy: true, error: null })
         try {
           const { user } = await authenticate(f)
@@ -97,11 +116,12 @@ export function AppProvider({ children }) {
           toast(`Olá, ${firstName(user)}!`)
           if (f.after === 'publish' && stateRef.current.draft) publish(stateRef.current.draft)
         } catch (err) {
-          go('lg', { busy: false, error: err.message })
+          go('lg', { busy: false, error: err.message, ...(NEW_CODE.includes(err.code) ? { codigo: '' } : {}) })
         }
       },
       // Passo da conta no cadastro de prestador.
       async account(u) {
+        if (u.mode === 'novo' && !u.codeSent) return sendCode(u, (v) => go('su', v))
         go('su', { busy: true, error: null })
         try {
           const { user, profile } = await authenticate(u)
@@ -113,7 +133,7 @@ export function AppProvider({ children }) {
             go('su', { busy: false, step: 1, nome: user.nome, senha: '' })
           }
         } catch (err) {
-          go('su', { busy: false, error: err.message })
+          go('su', { busy: false, error: err.message, ...(NEW_CODE.includes(err.code) ? { codigo: '' } : {}) })
         }
       },
       // Salva o cadastro de serviços e ativa o plano. O pagamento ainda não é cobrado (integração pendente).

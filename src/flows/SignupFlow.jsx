@@ -4,12 +4,12 @@ import { dateLabel, firstName, price } from '../lib/format'
 import { useApp } from '../state/AppContext'
 import { AreaPicker, AvailGrid, CategoryTile } from '../components/ui'
 import CepField from '../components/CepField'
-import AccountForm, { accountValid } from '../components/AccountForm'
+import AccountForm, { accountLabel, accountValid } from '../components/AccountForm'
 
 const STEPS = 5
 
-function StepAbout({ u, go }) {
-  return <AccountForm f={u} set={(v) => go('su', v)} intro="Os clientes veem seu nome, sua nota e seus serviços." />
+function StepAbout({ u, go, act }) {
+  return <AccountForm f={u} set={(v) => go('su', v)} onResend={() => act.sendCode(u, (v) => go('su', v))} intro="Os clientes veem seu nome, sua nota e seus serviços." />
 }
 
 function StepServices({ u, go }) {
@@ -111,12 +111,12 @@ export default function SignupFlow() {
         <button className="iconbtn" onClick={() => go('closeSignup')} disabled={u.paying || u.busy} aria-label="Fechar"><X size={20} /></button>
       </div>
       <div className="prog">{Array.from({ length: STEPS }, (_, i) => <i key={i} className={i <= step ? 'on' : ''} />)}</div>
-      <div className="obody"><View u={u} go={go} /></div>
+      <div className="obody"><View u={u} go={go} act={act} /></div>
       <div className="ofoot">
         {u.error && <p className="cep-msg err" style={{ margin: '0 2px 10px' }} role="alert">{u.error}</p>}
         {step === 0 ? (
           <button className="btn" onClick={() => act.account(u)} disabled={!canContinue || u.busy}>
-            {u.busy ? 'Aguarde…' : u.mode === 'entrar' ? 'Entrar' : 'Criar conta'}
+            {accountLabel(u)}
           </button>
         ) : step < STEPS - 1 ? (
           <button className="btn" onClick={() => go('suNext')} disabled={!canContinue}>Continuar</button>

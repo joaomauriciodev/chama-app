@@ -3,7 +3,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-ENV VITE_BASE=/
 RUN npm run build
 
 FROM nginx:1.29-alpine

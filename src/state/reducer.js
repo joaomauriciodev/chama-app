@@ -15,7 +15,7 @@ export const initialState = {
   sheet: null, // { type: 'pro' | 'order' | 'conv' | 'lock', id }
   search: { cat: null, sort: 'nota', q: '' },
   auth: null, // usuário logado ({ id, nome, telefone })
-  login: null, // tela de entrar/criar conta ({ mode, nome, tel, senha, busy, error, after })
+  login: null, // tela de entrar/criar conta ({ mode, nome, tel, senha, codeSent, codigo, resendAt, busy, error, after })
   signup: null, // cadastro de prestador em andamento
   prov: {
     registered: false,
@@ -32,7 +32,8 @@ export const initialState = {
   },
 }
 
-export const newAccountForm = (extra) => ({ mode: 'novo', nome: '', tel: '', senha: '', busy: false, error: null, ...extra })
+// `codeSent`: SMS do cadastro enviado, o formulário pede o código; `resendAt`: quando dá para pedir outro (ms).
+export const newAccountForm = (extra) => ({ mode: 'novo', nome: '', tel: '', senha: '', codeSent: false, codigo: '', resendAt: 0, busy: false, error: null, ...extra })
 
 // Quem já está logado pula o passo da conta.
 const newSignup = (prov, auth) => ({
@@ -93,7 +94,11 @@ export function reducer(state, { type, v }) {
     case 'suCat': s.signup.cats = toggle(s.signup.cats, v); break
     case 'suAvail': s.signup.avail[v] = !s.signup.avail[v]; break
     case 'suNext': s.signup.step++; s.signup.error = null; break
-    case 'suBack': if (s.signup.step > (s.auth ? 1 : 0)) s.signup.step--; else s.signup = null; break
+    case 'suBack':
+      if (s.signup.codeSent && s.signup.step === 0) Object.assign(s.signup, { codeSent: false, codigo: '', error: null }) // volta aos dados da conta
+      else if (s.signup.step > (s.auth ? 1 : 0)) s.signup.step--
+      else s.signup = null
+      break
     case 'closeSignup': s.signup = null; break
     case 'suPaid': Object.assign(s.signup, { paying: false, until: v, step: 5 }); break
     case 'finishSignup': {
