@@ -33,7 +33,7 @@ export function ProCard({ p }) {
         <span className="pname">{p.nome}</span>
         <span className="pmeta">
           <Rating value={p.nota} count={p.avaliacoes} />
-          {p.bairro && <span><MapPin size={14} /> {p.bairro}</span>}
+          {(p.bairro || p.cidade) && <span><MapPin size={14} /> {p.bairro || p.cidade}</span>}
         </span>
         <span className="pcats">{p.categorias.map((id) => cat(id)?.nome).filter(Boolean).join(', ')}</span>
       </span>

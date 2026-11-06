@@ -67,7 +67,7 @@ function ProSheet({ id }) {
 
   return (
     <>
-      <SheetHead media={<Avatar person={p} large />} title={p.nome} subtitle={p.bairro ? `${p.bairro}, ${p.cidade}` : p.convidado ? 'Ainda não usa o Chama' : ''} />
+      <SheetHead media={<Avatar person={p} large />} title={p.nome} subtitle={[p.bairro, p.cidade].filter(Boolean).join(', ') || (p.convidado ? 'Ainda não usa o Chama' : '')} />
       <div className="stats3">
         <div><small>Nota</small><b>{p.avaliacoes ? p.nota.toFixed(1) : '–'}</b></div>
         <div><small>Avaliações</small><b>{p.avaliacoes}</b></div>
