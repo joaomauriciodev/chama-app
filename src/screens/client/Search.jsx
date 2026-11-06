@@ -1,6 +1,7 @@
-import { Search as SearchIcon, SearchX } from 'lucide-react'
+import { ChevronDown, MapPin, Search as SearchIcon, SearchX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CATS } from '../../data/catalog'
+import { cityLabel, cityParams } from '../../lib/city'
 import { normalize } from '../../lib/format'
 import { useApi } from '../../lib/useApi'
 import { useApp } from '../../state/AppContext'
@@ -24,7 +25,7 @@ export default function Search() {
     return () => clearTimeout(t)
   }, [search.q])
 
-  const params = new URLSearchParams({ sort: search.sort })
+  const params = cityParams(state.city, new URLSearchParams({ sort: search.sort }))
   if (search.cat) params.set('categoria', search.cat)
   if (q.trim()) {
     params.set('q', q.trim())
@@ -35,6 +36,9 @@ export default function Search() {
   return (
     <div className="screen">
       <h1 className="title">Buscar</h1>
+      <button className="loc" style={{ marginBottom: 12 }} onClick={() => go('openCity')} aria-label="Trocar cidade">
+        <MapPin size={16} /><span>{cityLabel(state.city)}</span><ChevronDown size={16} />
+      </button>
       <label className="search">
         <SearchIcon size={18} />
         <input type="search" placeholder="Nome ou serviço, ex.: chuveiro" value={search.q} onChange={(e) => go('searchQ', e.target.value)} autoComplete="off" />
@@ -65,7 +69,7 @@ export default function Search() {
           </>
         ) : (
           <Empty icon={SearchX} title="Ninguém encontrado" action={<button className="btn ghost" onClick={() => go('clearSearch')}>Limpar busca</button>}>
-            Tente outro serviço ou publique seu pedido para avisar os profissionais da região.
+            {state.city ? `Nada em ${state.city.cidade} com esses filtros. Tente outro serviço, outra cidade ou publique seu pedido.` : 'Tente outro serviço ou publique seu pedido para avisar os profissionais da região.'}
           </Empty>
         )}
       </div>

@@ -1,5 +1,6 @@
-import { RotateCcw, UserRoundSearch } from 'lucide-react'
+import { ChevronDown, MapPin, RotateCcw, UserRoundSearch } from 'lucide-react'
 import { CATS, cat } from '../../data/catalog'
+import { cityLabel, cityParams } from '../../lib/city'
 import { firstName, money } from '../../lib/format'
 import { useApi } from '../../lib/useApi'
 import { useApp } from '../../state/AppContext'
@@ -18,7 +19,7 @@ export function repeatOrder(go, o, prestador) {
 
 export default function Home() {
   const { state, go } = useApp()
-  const top = useApi('/providers?sort=nota&limit=5')
+  const top = useApi(`/providers?${cityParams(state.city, new URLSearchParams({ sort: 'nota', limit: '5' }))}`)
   const mine = useApi(state.auth ? '/me/orders' : null)
   const again = (mine.data || [])
     .filter((o) => o.situacao === 'concluido')
@@ -31,7 +32,9 @@ export default function Home() {
       <header className="top">
         <div>
           <small>{state.auth ? `Olá, ${firstName(state.auth)}` : 'Olá!'}</small>
-          <span className="loc">Do que você precisa?</span>
+          <button className="loc" onClick={() => go('openCity')} aria-label="Trocar cidade">
+            <MapPin size={16} /><span>{state.city ? cityLabel(state.city) : 'Escolher cidade'}</span><ChevronDown size={16} />
+          </button>
         </div>
         <RoleSwitch />
       </header>
@@ -68,7 +71,7 @@ export default function Home() {
         </>
       )}
 
-      <h2 className="sec">Bem avaliados</h2>
+      <h2 className="sec">Bem avaliados{state.city ? ` em ${state.city.cidade}` : ''}</h2>
       {top.data?.length ? (
         <div className="list">{top.data.map((p) => <ProCard key={p.id} p={p} />)}</div>
       ) : top.data ? (

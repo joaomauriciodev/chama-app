@@ -1,5 +1,6 @@
 import { DEFAULT_ROOMS, MOVING_SUBS, ROOM_SUBS, WEEK } from '../data/catalog'
 import { profileToProv } from '../lib/api'
+import { storedCity } from '../lib/city'
 import { maskPhone } from '../lib/format'
 
 const avail = {}
@@ -14,6 +15,7 @@ export const initialState = {
   draft: null, // pedido em montagem
   sheet: null, // { type: 'pro' | 'order' | 'conv' | 'lock', id }
   search: { cat: null, sort: 'nota', q: '' },
+  city: storedCity(), // cidade do cliente ({ cidade, uf }) ou null = todas
   auth: null, // usuário logado ({ id, nome, telefone })
   login: null, // tela de entrar/criar conta ({ mode, nome, tel, senha, codeSent, codigo, resendAt, busy, error, after })
   signup: null, // cadastro de prestador em andamento
@@ -77,6 +79,7 @@ export function reducer(state, { type, v }) {
     case 'closeLogin': s.login = null; break
     case 'session':
       s.auth = v.user
+      if (v.user.cidade) s.city = { cidade: v.user.cidade, uf: v.user.uf } // a da conta vale em qualquer aparelho
       s.prov.nome = v.user.nome
       s.prov.tel = maskPhone(v.user.telefone)
       if (v.profile) {
@@ -143,6 +146,9 @@ export function reducer(state, { type, v }) {
 
     // sheets
     case 'openPro': s.sheet = { type: 'pro', id: v }; break
+    case 'openCity': s.sheet = { type: 'city' }; break
+    case 'city': s.city = v; s.sheet = null; break
+    case 'authCity': if (s.auth) Object.assign(s.auth, { cidade: v?.cidade ?? null, uf: v?.uf ?? null }); break // salva na conta
     case 'openOrder': s.sheet = { type: 'order', id: v }; break
     case 'openConv': s.sheet = { type: 'conv', id: v }; break
     case 'lock': s.flow = null; s.draft = null; s.sheet = { type: 'lock', id: v }; break

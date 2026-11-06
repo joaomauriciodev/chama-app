@@ -1,11 +1,14 @@
-import { Hand, Lock, MapPin, MessageCircle, Radar, RotateCcw, Star, X } from 'lucide-react'
+import { Check, Globe, Hand, Lock, MapPin, MessageCircle, Radar, RotateCcw, Search as SearchIcon, Star, X } from 'lucide-react'
+import { useState } from 'react'
 import { CLIENT_TAGS, PRO_QUICK, QUICK_REPLIES, RATING_TAGS, ROOMS, cat } from '../data/catalog'
 import { convStatus } from '../lib/deal'
-import { firstName, money, size, whenLabel } from '../lib/format'
+import { cityLabel, sameCity } from '../lib/city'
+import { firstName, money, normalize, size, whenLabel } from '../lib/format'
 import { useApi } from '../lib/useApi'
 import { useApp } from '../state/AppContext'
 import { Avatar, Pill, Rating } from '../components/ui'
 import { Conversation, RateBlock, WhatsAppCard } from '../components/Chat'
+import CepField from '../components/CepField'
 import { Sheet } from '../components/Shell'
 import { repeatOrder } from '../screens/client/Home'
 
@@ -239,6 +242,51 @@ function LockSheet({ id }) {
   )
 }
 
+// Escolha da cidade do cliente: cidades com profissionais (busca sem acento) ou, se a sua não aparece, pelo CEP.
+function CitySheet() {
+  const { state, act } = useApp()
+  const { data: cities, error } = useApi('/cities')
+  const [q, setQ] = useState('')
+  const [byCep, setByCep] = useState(false)
+  const term = normalize(q.trim())
+  const list = (cities || []).filter((c) => !term || normalize(`${c.cidade} ${c.uf}`).includes(term)).slice(0, 50)
+  const pick = (c) => act.setCity(c && { cidade: c.cidade, uf: c.uf })
+
+  return (
+    <>
+      <SheetHead media={<span className="ic"><MapPin size={20} /></span>} title="Sua cidade" subtitle={`Agora: ${cityLabel(state.city)}`} />
+      {byCep ? (
+        <>
+          <p className="hint">Digite um CEP da sua cidade.</p>
+          <CepField value={null} onFound={(a) => a && pick(a)} />
+          <button className="btn ghost" style={{ marginTop: 14 }} onClick={() => setByCep(false)}>Voltar para a lista</button>
+        </>
+      ) : (
+        <>
+          <label className="search">
+            <SearchIcon size={18} />
+            <input type="search" placeholder="Buscar cidade" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" autoFocus />
+          </label>
+          <button className="row" onClick={() => pick(null)}>
+            <span className="ic sm"><Globe size={18} /></span>
+            <span className="rl"><b>Todas as cidades</b><small>Ver profissionais de qualquer lugar</small></span>
+            {!state.city && <Check size={18} />}
+          </button>
+          {error ? <p className="count">{error.message}</p> : !cities ? <p className="count">Carregando…</p> : list.map((c) => (
+            <button key={`${c.cidade}-${c.uf}`} className="row" onClick={() => pick(c)}>
+              <span className="ic sm"><MapPin size={18} /></span>
+              <span className="rl"><b>{c.cidade}, {c.uf}</b><small>{c.profissionais} {c.profissionais === 1 ? 'profissional' : 'profissionais'}</small></span>
+              {sameCity(c, state.city) && <Check size={18} />}
+            </button>
+          ))}
+          {cities && !list.length && <p className="count">Nenhuma cidade com profissionais encontrada para “{q}”.</p>}
+          <button className="btn ghost" style={{ marginTop: 14 }} onClick={() => setByCep(true)}>Minha cidade não está na lista</button>
+        </>
+      )}
+    </>
+  )
+}
+
 export default function SheetHost() {
   const { state } = useApp()
   const { sheet } = state
@@ -248,6 +296,7 @@ export default function SheetHost() {
       {sheet.type === 'order' && <OrderSheet key={sheet.id} id={sheet.id} />}
       {sheet.type === 'conv' && <ConvSheet key={sheet.id} id={sheet.id} />}
       {sheet.type === 'lock' && <LockSheet key={sheet.id} id={sheet.id} />}
+      {sheet.type === 'city' && <CitySheet />}
     </Sheet>
   )
 }

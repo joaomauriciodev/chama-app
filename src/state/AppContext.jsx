@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { addrBody, api, getProfile, provToBody, session } from '../lib/api'
+import { storeCity } from '../lib/city'
 import { confirmPhoneCode, endPhoneSession, sendPhoneCode } from '../lib/phoneAuth'
 import { firstName } from '../lib/format'
 import { initialState, reducer } from './reducer'
@@ -168,6 +169,15 @@ export function AppProvider({ children }) {
         papel === 'cliente' ? 'Pedido firmado! WhatsApp liberado' : 'Pedido firmado! O cliente recebeu seu WhatsApp',
       ),
       rate: (id, rating) => call(() => api(`/conversations/${id}/rating`, { method: 'POST', body: rating }), 'Avaliação enviada'),
+      // Troca a cidade do cliente: na hora no app e no aparelho; com login, também na conta.
+      setCity(c) {
+        go('city', c)
+        if (session.get()) {
+          api('/me/cidade', { method: 'PUT', body: { cidade: c?.cidade ?? null, uf: c?.uf ?? null } })
+            .then((u) => go('authCity', u))
+            .catch(() => {})
+        }
+      },
     }
   }, [go, toast, refresh])
 
@@ -178,6 +188,17 @@ export function AppProvider({ children }) {
       .then(([user, profile]) => go('session', { user, profile }))
       .catch(() => {})
   }, [go])
+
+  // Login numa conta sem cidade: leva a cidade escolhida antes (no aparelho) para a conta.
+  const { city } = state
+  const authId = state.auth?.id
+  const authHasCity = !!state.auth?.cidade
+  useEffect(() => {
+    if (!authId || authHasCity || !city) return
+    api('/me/cidade', { method: 'PUT', body: city }).then((u) => go('authCity', u)).catch(() => {})
+  }, [authId, authHasCity, city, go])
+  // Guarda no aparelho a cidade atual, inclusive a que veio da conta ao entrar.
+  useEffect(() => storeCity(city), [city])
 
   // Salva na API cada alteração do cadastro de serviços feita no perfil (com pequena espera entre toques).
   const saved = useRef(null)
