@@ -72,7 +72,8 @@ export function AppProvider({ children }) {
       const res = await api(login ? '/auth/login' : '/auth/register', { method: 'POST', body })
       if (!login) endPhoneSession()
       session.set(res.token)
-      const profile = login ? await getProfile() : null
+      // No cadastro também: prestador importado por CSV que se cadastra já tem perfil.
+      const profile = await getProfile()
       go('session', { user: res.user, profile })
       refresh()
       return { user: res.user, profile }

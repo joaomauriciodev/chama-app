@@ -67,7 +67,7 @@ function ProSheet({ id }) {
 
   return (
     <>
-      <SheetHead media={<Avatar person={p} large />} title={p.nome} subtitle={`${p.bairro}, ${p.cidade}`} />
+      <SheetHead media={<Avatar person={p} large />} title={p.nome} subtitle={p.bairro ? `${p.bairro}, ${p.cidade}` : p.convidado ? 'Ainda não usa o Chama' : ''} />
       <div className="stats3">
         <div><small>Nota</small><b>{p.avaliacoes ? p.nota.toFixed(1) : '–'}</b></div>
         <div><small>Avaliações</small><b>{p.avaliacoes}</b></div>
@@ -134,7 +134,7 @@ function OrderSheet({ id }) {
                   <Avatar person={cv.prestador} />
                   <span className="pmain">
                     <span className="pname">{cv.prestador.nome}</span>
-                    <span className="pmeta"><Rating value={cv.prestador.nota} count={cv.prestador.avaliacoes} /></span>
+                    <span className="pmeta">{cv.prestador.convidado ? <span className="novo">Ainda não usa o Chama</span> : <Rating value={cv.prestador.nota} count={cv.prestador.avaliacoes} />}</span>
                     <Pill tone={tone} style={{ alignSelf: 'flex-start', marginTop: 4 }}>{label}</Pill>
                   </span>
                   {valor && <span className="pprice"><small>{cv.valor ? 'combinado' : 'proposta'}</small>{money(valor)}</span>}
@@ -184,7 +184,10 @@ function ConvSheet({ id }) {
 
       <Timeline status={cv.estado} from={1} />
 
-      {cv.estado === 'conversa' && (
+      {isClient && cv.outro.convidado && cv.estado === 'conversa' && (
+        <div className="banner">{who} ainda não usa o Chama. Vamos avisar pelo WhatsApp, e a resposta aparece aqui quando entrar.</div>
+      )}
+      {cv.estado === 'conversa' && !(isClient && cv.outro.convidado) && (
         <p className="muted small" style={{ margin: '0 0 8px' }}>
           {isClient ? `Combinem o valor aqui. Ao firmar, o WhatsApp de ${who} é liberado.` : `Combine o valor aqui. Ao firmar, ${who} recebe seu WhatsApp.`}
         </p>
