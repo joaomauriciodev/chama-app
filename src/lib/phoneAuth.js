@@ -18,12 +18,29 @@ const MESSAGES = {
   'auth/network-request-failed': 'Sem conexão. Confira a internet e tente de novo.',
 }
 
+// Erros de configuração do projeto no console do Firebase: não adianta o usuário tentar de novo.
+const SETUP = {
+  'auth/unauthorized-domain': 'domínio do app não autorizado (Authentication > Configurações > Domínios autorizados)',
+  'auth/invalid-app-credential': 'reCAPTCHA recusado; confira se o domínio do app está nos domínios autorizados',
+  'auth/captcha-check-failed': 'reCAPTCHA recusado; confira se o domínio do app está nos domínios autorizados',
+  'auth/operation-not-allowed': 'login por telefone desativado (Authentication > Método de login > Telefone)',
+  'auth/billing-not-enabled': 'projeto sem faturamento (plano Blaze)',
+  'auth/invalid-api-key': 'chave de API inválida (FIREBASE_API_KEY)',
+  'auth/api-key-not-valid.-please-pass-a-valid-api-key.': 'chave de API inválida (FIREBASE_API_KEY)',
+  'auth/requests-from-referer-<empty>-are-blocked.': 'chave de API restrita a outros sites',
+  'chama/sem-config': 'faltam FIREBASE_API_KEY, FIREBASE_PROJECT_ID ou FIREBASE_APP_ID no chama-app',
+}
+
 // Erro com mensagem em português; `code` = 'codigo_expirado' quando é preciso pedir outro SMS.
+// Erro desconhecido mostra o código do Firebase, para dar para diagnosticar pelo print do usuário.
 export class PhoneAuthError extends Error {
   constructor(err) {
-    super(MESSAGES[err.code] || 'Não conseguimos verificar o celular agora. Tente de novo.')
+    const setup = SETUP[err.code] || (/referer|blocked/i.test(err.code ?? '') && 'chave de API restrita a outros sites')
+    super(MESSAGES[err.code]
+      || (setup && `O envio de SMS está mal configurado: ${setup}.`)
+      || `Não conseguimos verificar o celular agora. Tente de novo.${err.code ? ` (${err.code})` : ''}`)
     if (err.code === 'auth/code-expired') this.code = 'codigo_expirado'
-    if (!MESSAGES[err.code]) console.error('Firebase Phone Auth:', err) // configuração (domínio, chave, SMS desativado) aparece aqui
+    if (!MESSAGES[err.code]) console.error('Firebase Phone Auth:', err)
   }
 }
 
@@ -33,7 +50,7 @@ let confirmation
 
 async function load() {
   if (fb) return fb
-  if (!CONFIG.apiKey || !CONFIG.projectId || !CONFIG.appId) throw new Error('Firebase não configurado (FIREBASE_API_KEY, FIREBASE_PROJECT_ID e FIREBASE_APP_ID)')
+  if (!CONFIG.apiKey || !CONFIG.projectId || !CONFIG.appId) throw Object.assign(new Error('Firebase não configurado'), { code: 'chama/sem-config' })
   const [{ initializeApp }, mod] = await Promise.all([import('firebase/app'), import('firebase/auth')])
   const auth = mod.getAuth(initializeApp(CONFIG))
   auth.languageCode = 'pt-BR'
